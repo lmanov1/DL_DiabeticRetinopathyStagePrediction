@@ -5,12 +5,12 @@ description = "predicting diabetic retinopathy using deep learning technics"
 authors = ["Einav Lapid <lapideinav@gmail.com> , Lidi Manov <peru12003@gmail.com> , Guy Yarhi <GUY.YARHI@gmail.com> , Alon Shmuely <alonshmu@gmail.com>"]
 license = "MIT"
 readme = "README.md"
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.10"
 flopco-pytorch = "^0.1.4"
 matplotlib = "^3.9.2"
-tensorflow = "^2.17.0"
 fastai = "^2.7.17"
 seaborn = "^0.13.2"
 pandas = "^2.2.3"
