@@ -1,9 +1,14 @@
 import os
+# import json to access Kaggle API
+
+import json
+import
+
+
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from kaggle.api.kaggle_api_extended import KaggleApi
-
 
 class KaggleDataLoader:
     def __init__(self, dataset_name, kaggle_json_path):
@@ -15,24 +20,40 @@ class KaggleDataLoader:
         self.test_data = None
         self.scaler = StandardScaler()
 
-        self.create_kaggle_json()
-        self.setup_kaggle_api()
+        self.ensure_and_set_kaggle_creds()
 
-    def create_kaggle_json(self):
+    def ensure_and_set_kaggle_creds(self):
         """
-        Create the Kaggle API JSON file if it doesn't exist.
+        Ensures the kaggle.json file exists and sets Kaggle credentials as environment variables.
         """
+        kaggle_dir = os.path.dirname(self.kaggle_json_path)
+
+        # Create the directory if it doesn't exist
+        if not os.path.exists(kaggle_dir):
+            os.makedirs(kaggle_dir)
+
+        # Check if the kaggle.json file exists
         if not os.path.exists(self.kaggle_json_path):
-            api_token = {
+            # Create the kaggle.json file with default data (Replace with actual API token)
+            kaggle_json = {
                 "username": "your_kaggle_username",
                 "key": "your_kaggle_key"
             }
-            os.makedirs(os.path.dirname(self.kaggle_json_path), exist_ok=True)
-            with open(self.kaggle_json_path, 'w') as file:
-                json.dump(api_token, file)
-            print(f"{self.kaggle_json_path} created.")
+            with open(self.kaggle_json_path, 'w') as f:
+                json.dump(kaggle_json, f)
+            print(f"Created kaggle.json at {self.kaggle_json_path}")
         else:
-            print(f"{self.kaggle_json_path} already exists.")
+            print(f"kaggle.json already exists at {self.kaggle_json_path}")
+
+        # Load the kaggle.json file and set environment variables
+        with open(self.kaggle_json_path, 'r') as f:
+            kaggle_creds = json.load(f)
+
+        os.environ['KAGGLE_USERNAME'] = kaggle_creds['username']
+        os.environ['KAGGLE_KEY'] = kaggle_creds['key']
+        print("Kaggle credentials loaded and environment variables set.")
+
+        self.setup_kaggle_api()
 
     def setup_kaggle_api(self):
         """
@@ -97,10 +118,10 @@ class KaggleDataLoader:
         return self.test_data
 
 # Example usage
-# kaggle_loader = KaggleDataLoader('benjaminwarner/resized-2015-2019-blindness-detection-images', 'C:/Users/DELL/.kaggle/kaggle.json')
-# kaggle_loader.load_data('labels', 'trainLabels15.csv')
-# kaggle_loader.preprocess_data()
-# kaggle_loader.split_data()
-# train_data = kaggle_loader.get_train_data()
-# validation_data = kaggle_loader.get_validation_data()
-# test_data = kaggle_loader.get_test_data()
+kaggle_loader = KaggleDataLoader('benjaminwarner/resized-2015-2019-blindness-detection-images', 'C:/Users/DELL/.kaggle/kaggle.json')
+kaggle_loader.load_data('labels', 'trainLabels15.csv')
+kaggle_loader.preprocess_data()
+kaggle_loader.split_data()
+train_data = kaggle_loader.get_train_data()
+validation_data = kaggle_loader.get_validation_data()
+test_data = kaggle_loader.get_test_data()

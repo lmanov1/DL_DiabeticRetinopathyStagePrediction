@@ -5,11 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c113a973-520e-4a47-abb6-ae8cef413f37" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/code/Util/kaggle.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/code/data/Dataloader.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Docs/SOW_1.0.docx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Docs/System_SRS_1.0.docx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/kaggle.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/poetry.lock" beforeDir="false" afterPath="$PROJECT_DIR$/poetry.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pyproject.toml" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/Util/kaggle.json" beforeDir="false" afterPath="$PROJECT_DIR$/code/Util/KaggleJSON.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/data/Dataloader.py" beforeDir="false" afterPath="$PROJECT_DIR$/code/data/Dataloader.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -43,6 +44,7 @@
     "ASKED_ADD_EXTERNAL_FILES": "true",
     "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "Python.Dataloader.executor": "Run",
+    "Python.KaggleJSON.executor": "Run",
     "Python.check_hardware_and_install.executor": "Run",
     "Python.main.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
@@ -54,6 +56,8 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\DELL\Documents\GitHub\DL_DiabeticRetinopathyStagePrediction\data" />
+      <recent name="C:\Users\DELL\Documents\GitHub\DL_DiabeticRetinopathyStagePrediction\code\Util" />
       <recent name="C:\Users\DELL\Documents\GitHub\DL_DiabeticRetinopathyStagePrediction\code" />
     </key>
   </component>
