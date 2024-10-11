@@ -10,6 +10,7 @@ package-mode = false
 
 
 #torchvision = "^0.19.1"
+# torchaudio = "^2.4.1"
 
 [tool.poetry.dependencies]
 python = "^3.10"
@@ -22,6 +23,8 @@ huggingface = "^0.0.1"
 tomlkit = "^0.13.2"
 requests = "^2.32.3"
 kaggle = "^1.5.12"
+tensorflow = "^2.17.0"
+torch = "^2.4.1"
 
 
 [tool.poetry.group.dev.dependencies]
