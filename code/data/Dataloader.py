@@ -6,15 +6,13 @@ from kaggle.api.kaggle_api_extended import KaggleApi
 import platform
 import json
 
-# Choose here the dataset(s) you want to download (https://www.kaggle.com/search?q=APTOS+2019+Blindness+Detection+Dataset+in%3Adatasets)
-# Dataset names can be found under the  https://www.kaggle.com/datasets page
-DATASET_NAME = 'benjaminwarner/resized-2015-2019-blindness-detection-images'   # 18.75 GB  
-DATASET_NAME1 = 'mariaherrerot/aptos2019'   # 8.6GB
-DATASET_PATH = 'data/raw/'
+
 class KaggleDataLoader:
-    def __init__(self, dataset_name, kaggle_json_path):
+    def __init__(self, dataset_path , dataset_name, kaggle_json_path = None):
         self.dataset_name = dataset_name
+        self.dataset_path = dataset_path
         self.kaggle_json_path = kaggle_json_path
+        print(f"dataset_path {self.dataset_path} dataset {self.dataset_name} , kaggle_json_path = {self.kaggle_json_path}")
         self.data = None
         self.train_data = None
         self.validation_data = None
@@ -28,17 +26,26 @@ class KaggleDataLoader:
         """
         Create the Kaggle API JSON file if it doesn't exist.
         """
+        if ( self.kaggle_json_path == None):
+            # Find the pre-installed kaggle API key
+            home_directory = get_home_directory()
+            self.kaggle_json_path = os.path.join(home_directory, '.kaggle', 'kaggle.json')
+            print(self.kaggle_json_path)
+        
         if not os.path.exists(self.kaggle_json_path):
-            api_token = {
-                "username": "your_kaggle_username",
-                "key": "your_kaggle_key"
-            }
-            os.makedirs(os.path.dirname(self.kaggle_json_path), exist_ok=True)
-            with open(self.kaggle_json_path, 'w') as file:
-                json.dump(api_token, file)
-            print(f"{self.kaggle_json_path} created.")
-        else:
-            print(f"{self.kaggle_json_path} already exists.")
+            raise FileNotFoundError(f"Kaggle JSON file not found at {self.kaggle_json_path}")
+
+        # if not os.path.exists(self.kaggle_json_path):
+        #     api_token = {
+        #         "username": "your_kaggle_username",
+        #         "key": "your_kaggle_key"
+        #     }
+        #     os.makedirs(os.path.dirname(self.kaggle_json_path), exist_ok=True)
+        #     with open(self.kaggle_json_path, 'w') as file:
+        #         json.dump(api_token, file)
+        #     print(f"{self.kaggle_json_path} created.")
+        # else:
+        #     print(f"{self.kaggle_json_path} already exists.")
 
     def setup_kaggle_api(self):
         """
@@ -47,15 +54,30 @@ class KaggleDataLoader:
         os.environ['KAGGLE_CONFIG_DIR'] = os.path.dirname(self.kaggle_json_path)
         api = KaggleApi()
         api.authenticate()
-        api.dataset_download_files(self.dataset_name, path=DATASET_PATH, unzip=True)
+        print("Kaggle API setup complete")
+        self.dataset_dir = os.path.join(self.dataset_path, self.dataset_name)
+        if os.path.isdir(self.dataset_dir):
+            print(f"Dataset {self.dataset_name} was already downloaded")
+            return 
+        else:
+            print(f"Dataset {self.dataset_dir} not found - downloading dataset {self.dataset_name}" )     
+        
+        api.dataset_download_files(self.dataset_name, path=self.dataset_dir, unzip=True)
         print(f"Dataset {self.dataset_name} downloaded")
+        return 
 
-    def load_data(self, labels_path, file_name):
+    def load_data(self, file_name):
         """
         Load data from the specified file within the downloaded dataset.
         """
-        self.data = pd.read_csv(os.path.join(labels_path, file_name))
+        dataset_files = os.path.join(self.dataset_dir , file_name)
+        print(f"Going to read into csv: {dataset_files}")
+        self.data = pd.read_csv(dataset_files)
+        self.data.shape
+        self.data.head()
+        self.data.info()
         print(f"Data loaded from {file_name}")
+        return self.data
 
     def preprocess_data(self):
         """
@@ -117,16 +139,9 @@ def get_home_directory():
 
 
 #===============================================================================
-# Get the kaggle API key
-home_directory = get_home_directory()
-kaggle_json_path = os.path.join(home_directory, '.kaggle', 'kaggle.json')
-print(kaggle_json_path)
-if not os.path.exists(kaggle_json_path):
-    raise FileNotFoundError(f"Kaggle JSON file not found at {kaggle_json_path}")
-
 # Download datasets into DATASET_PATH
-kaggle_loader = KaggleDataLoader(DATASET_NAME1, kaggle_json_path)
-kaggle_loader.load_data(os.path.join(DATASET_PATH, 'labels'), 'trainLabels15.csv')
+# kaggle_loader = KaggleDataLoader(DATASET_NAME)
+# kaggle_loader.load_data(os.path.join(DATASET_PATH, 'labels'), 'trainLabels15.csv')
 # kaggle_loader.preprocess_data()
 # kaggle_loader.split_data()
 # train_data = kaggle_loader.get_train_data()

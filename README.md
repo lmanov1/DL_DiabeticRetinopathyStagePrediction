@@ -3,10 +3,10 @@ This repo hosts a final DL project conducted as a part of data scientist certifi
 
 
 
-Getting started
-1. Prerequerements: 
+## Getting started
+1. Pre-requirements: 
     - Be sure you have poetry installed in your environment    
-    - If you have GPU , install nvidia-smi cli      
+    - If you have GPU card (NVidia), be sure you have nvidia-smi cli installed         
 2. clone the repo  , go to the cloned directory   
     `git clone git@github.com:lmanov1/DL_DiabeticRetinopathyStagePrediction.git`
 3. Run setup: this should detect GPU and install supporting python system libraries (unsupported by poetry) like CUDA     
@@ -32,5 +32,7 @@ Getting started
     In addition, you can export any other configuration value that normally would be in the kaggle.json in the format 'KAGGLE_' (note uppercase).
 
 7. Now you all set and can run project logics , for example       
-`poetry run python3 /code/main.py`      
-`poetry run python3 code/data/Dataloader.py`
+    
+    `poetry run python3 code/data/Dataloader.py`   
+    `poetry run python3 /code/main.py`  
+
