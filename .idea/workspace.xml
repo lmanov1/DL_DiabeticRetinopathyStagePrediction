@@ -4,14 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c113a973-520e-4a47-abb6-ae8cef413f37" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Docs/SOW_1.0.docx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Docs/System_SRS_1.0.docx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/kaggle.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/code/Util/kaggle.json" beforeDir="false" afterPath="$PROJECT_DIR$/code/Util/KaggleJSON.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/code/data/Dataloader.py" beforeDir="false" afterPath="$PROJECT_DIR$/code/data/Dataloader.py" afterDir="false" />
-    </list>
+    <list default="true" id="c113a973-520e-4a47-abb6-ae8cef413f37" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -39,21 +32,21 @@
     <option name="showLibraryContents" value="true" />
     <option name="showMembers" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_ADD_EXTERNAL_FILES": "true",
-    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "Python.Dataloader.executor": "Run",
-    "Python.KaggleJSON.executor": "Run",
-    "Python.check_hardware_and_install.executor": "Run",
-    "Python.main.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "git-widget-placeholder": "Guy__branch__Intel__CPU",
-    "ignore.virus.scanning.warn.message": "true",
-    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
+    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;Python.Dataloader.executor&quot;: &quot;Run&quot;,
+    &quot;Python.KaggleJSON.executor&quot;: &quot;Run&quot;,
+    &quot;Python.check_hardware_and_install.executor&quot;: &quot;Run&quot;,
+    &quot;Python.main.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;Guy__branch__Intel__CPU&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\DELL\Documents\GitHub\DL_DiabeticRetinopathyStagePrediction\data" />
