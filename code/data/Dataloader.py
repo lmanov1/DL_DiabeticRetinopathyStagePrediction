@@ -1,24 +1,19 @@
-import os
+
+
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from kaggle.api.kaggle_api_extended import KaggleApi
-import platform
-import json
+from Util.MultiPlatform import *
+#import json
 
 
-class KaggleDataLoader:
+class KaggleDataDownLoader:
     def __init__(self, dataset_path , dataset_name, kaggle_json_path = None):
         self.dataset_name = dataset_name
         self.dataset_path = dataset_path
         self.kaggle_json_path = kaggle_json_path
         print(f"dataset_path {self.dataset_path} dataset {self.dataset_name} , kaggle_json_path = {self.kaggle_json_path}")
-        self.data = None
-        self.train_data = None
-        self.validation_data = None
-        self.test_data = None
-        self.scaler = StandardScaler()
-
         self.create_kaggle_json()
         self.setup_kaggle_api()
 
@@ -55,9 +50,11 @@ class KaggleDataLoader:
         api = KaggleApi()
         api.authenticate()
         print("Kaggle API setup complete")
-        self.dataset_dir = os.path.join(self.dataset_path, self.dataset_name)
+        self.dataset_dir = os.path.join(self.dataset_path, self.dataset_name )
+        self.dataset_dir +=  get_path_separator()
+        #print(f"Dataset directory: {self.dataset_dir}")
         if os.path.isdir(self.dataset_dir):
-            print(f"Dataset {self.dataset_name} was already downloaded")
+            print(f"Dataset {self.dataset_name} was already downloaded =========")
             return 
         else:
             print(f"Dataset {self.dataset_dir} not found - downloading dataset {self.dataset_name}" )     
@@ -65,82 +62,16 @@ class KaggleDataLoader:
         api.dataset_download_files(self.dataset_name, path=self.dataset_dir, unzip=True)
         print(f"Dataset {self.dataset_name} downloaded")
         return 
-
-    def load_data(self, file_name):
-        """
-        Load data from the specified file within the downloaded dataset.
-        """
-        dataset_files = os.path.join(self.dataset_dir , file_name)
-        print(f"Going to read into csv: {dataset_files}")
-        self.data = pd.read_csv(dataset_files)
-        self.data.shape
-        self.data.head()
-        self.data.info()
-        print(f"Data loaded from {file_name}")
-        return self.data
-
-    def preprocess_data(self):
-        """
-        Preprocess data, such as scaling and handling missing values.
-        """
-        self.data = self.data.dropna()
-
-        # Assuming 'target' is the label column; adjust if necessary
-        features = self.data.drop('target', axis=1)
-        target = self.data['target']
-        features_scaled = self.scaler.fit_transform(features)
-
-        self.data = pd.DataFrame(features_scaled, columns=features.columns)
-        self.data['target'] = target
-        print("Data preprocessed")
-
-    def split_data(self, validation_size=0.2, test_size=0.2):
-        """
-        Split data into training, validation, and testing sets.
-        """
-        features = self.data.drop('target', axis=1)
-        target = self.data['target']
-
-        train_data, temp_data = train_test_split(self.data, test_size=test_size, random_state=42)
-        self.train_data, self.validation_data = train_test_split(train_data, test_size=validation_size, random_state=42)
-        self.test_data = temp_data
-        print(f"Data split into training (80%), validation (16%), and testing (20%) sets")
-
-    def get_train_data(self):
-        """
-        Get the training data.
-        """
-        return self.train_data
-
-    def get_validation_data(self):
-        """
-        Get the validation data.
-        """
-        return self.validation_data
-
-    def get_test_data(self):
-        """
-        Get the test data.
-        """
-        return self.test_data
-
-
-def get_home_directory():
-    system = platform.system()
-    if system == 'Linux' or system == 'Darwin':  # Darwin is macOS
-        home_dir = os.environ.get('HOME')        
-    elif system == 'Windows':
-        home_dir = os.environ.get('USERPROFILE')
-    else:
-        raise EnvironmentError("Unsupported operating system")
     
-    print(f"Running on {system}. Home directory: {home_dir}")
-    return home_dir
+    def get_dataset_dir(self):
+        return self.dataset_dir
 
+    # The data is already split into train and test and validation; 
+    # Data loader implemented in data_preparation.py
 
 #===============================================================================
 # Download datasets into DATASET_PATH
-# kaggle_loader = KaggleDataLoader(DATASET_NAME)
+# kaggle_loader = KaggleDataDownLoader(DATASET_NAME)
 # kaggle_loader.load_data(os.path.join(DATASET_PATH, 'labels'), 'trainLabels15.csv')
 # kaggle_loader.preprocess_data()
 # kaggle_loader.split_data()
