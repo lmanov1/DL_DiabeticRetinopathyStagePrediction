@@ -111,6 +111,7 @@ def main():
         learn.fit_one_cycle(10)
         end_time = time.time()
         print(f"==> CNN model training time: {end_time - start_time} seconds")
+        torch.save(pretrained_model.state_dict(), str(str(key)+ '_inference_model.pth'))
         # Evaluate the model  - Uses ClassificationInterpretation to plot the confusion matrix and the top losses.
         interp = ClassificationInterpretation.from_learner(learn)
         interp.plot_confusion_matrix()
