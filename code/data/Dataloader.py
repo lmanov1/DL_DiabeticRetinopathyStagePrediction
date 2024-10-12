@@ -9,6 +9,14 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from kaggle.api.kaggle_api_extended import KaggleApi
+import platform
+import json
+
+# Choose here the dataset(s) you want to download (https://www.kaggle.com/search?q=APTOS+2019+Blindness+Detection+Dataset+in%3Adatasets)
+# Dataset names can be found under the  https://www.kaggle.com/datasets page
+DATASET_NAME = 'benjaminwarner/resized-2015-2019-blindness-detection-images'   # 18.75 GB  
+DATASET_NAME1 = 'mariaherrerot/aptos2019'   # 8.6GB
+DATASET_PATH = 'data/raw/'
 
 class KaggleDataLoader:
     def __init__(self, dataset_name, kaggle_json_path):
@@ -62,7 +70,7 @@ class KaggleDataLoader:
         os.environ['KAGGLE_CONFIG_DIR'] = os.path.dirname(self.kaggle_json_path)
         api = KaggleApi()
         api.authenticate()
-        api.dataset_download_files(self.dataset_name, path='.', unzip=True)
+        api.dataset_download_files(self.dataset_name, path=DATASET_PATH, unzip=True)
         print(f"Dataset {self.dataset_name} downloaded")
 
     def load_data(self, labels_path, file_name):
@@ -117,11 +125,33 @@ class KaggleDataLoader:
         """
         return self.test_data
 
-# Example usage
-kaggle_loader = KaggleDataLoader('benjaminwarner/resized-2015-2019-blindness-detection-images', 'C:/Users/DELL/.kaggle/kaggle.json')
-kaggle_loader.load_data('labels', 'trainLabels15.csv')
-kaggle_loader.preprocess_data()
-kaggle_loader.split_data()
-train_data = kaggle_loader.get_train_data()
-validation_data = kaggle_loader.get_validation_data()
-test_data = kaggle_loader.get_test_data()
+def get_home_directory():
+    system = platform.system()
+    if system == 'Linux' or system == 'Darwin':  # Darwin is macOS
+        home_dir = os.environ.get('HOME')        
+    elif system == 'Windows':
+        home_dir = os.environ.get('USERPROFILE')
+    else:
+        raise EnvironmentError("Unsupported operating system")
+    
+    print(f"Running on {system}. Home directory: {home_dir}")
+    return home_dir
+
+
+#===============================================================================
+# Get the kaggle API key
+home_directory = get_home_directory()
+kaggle_json_path = os.path.join(home_directory, '.kaggle', 'kaggle.json')
+print(kaggle_json_path)
+if not os.path.exists(kaggle_json_path):
+    raise FileNotFoundError(f"Kaggle JSON file not found at {kaggle_json_path}")
+
+# Download datasets into DATASET_PATH
+kaggle_loader = KaggleDataLoader(DATASET_NAME1, kaggle_json_path)
+kaggle_loader.load_data(os.path.join(DATASET_PATH, 'labels'), 'trainLabels15.csv')
+# kaggle_loader.preprocess_data()
+# kaggle_loader.split_data()
+# train_data = kaggle_loader.get_train_data()
+# validation_data = kaggle_loader.get_validation_data()
+# test_data = kaggle_loader.get_test_data()
+

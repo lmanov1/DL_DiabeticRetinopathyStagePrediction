@@ -1,20 +1,14 @@
-import subprocess
+# This will be run manually by the user to check for GPU availability and install CUDA if necessary
+# from Util import check_hardware_and_install as check_hardware_and_install
+# check_hardware_and_install.install_dependencies()
+
 # Import necessary modules
 import torch
-
 # Import your model class# Import your model class
-from models import interface_model as Neural_Net
+from models import inference_model as Neural_Net
 from data import data_preparation as data_preparation
 from data import data_preprocessing as data_preprocessing
-
-
-# Run the hardware detection and installation script
-subprocess.run(['python', 'Util/check_hardware_and_install.py'], check=True)
-
-# Check the device
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print(f"Using device: {device}")
-
+from data import Dataloader as Dataloader
 
 # Define your main function
 def main():
