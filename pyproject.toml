@@ -25,6 +25,8 @@ requests = "^2.32.3"
 kaggle = "^1.5.12"
 tensorflow = "^2.17.0"
 torch = "^2.4.1"
+numpy = "^1.26.4"
+wrapt = "^1.16.0"
 
 
 [tool.poetry.group.dev.dependencies]

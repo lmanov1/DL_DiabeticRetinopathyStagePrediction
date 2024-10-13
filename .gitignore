@@ -1,7 +1,8 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
+
+
+code/data/raw/offline/labels/trainLabels15.csv
+resized-2015-2019-blindness-detection-images.zip
+code/data/raw/offline/labels/testImages19.csv
 
 # C extensions
 *.so
@@ -162,5 +163,6 @@ cython_debug/
 .idea/
 kaggle.json
 data/raw/*
+data/output/*
+
 .idea/workspace.xml
-*.xml

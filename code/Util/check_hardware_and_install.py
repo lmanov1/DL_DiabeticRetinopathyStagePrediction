@@ -3,9 +3,11 @@ import subprocess
 import platform
 import sys
 
-def is_nvidia_gpu_available():
 
-    #nvidia-smi is a command-line utility that comes with the NVIDIA GPU display drivers. It provides information about the GPU, including its utilization, temperature, and memory usage. If the command is not found, it likely means that the NVIDIA drivers are not installed, and therefore, the system does not have an NVIDIA GPU.
+def is_nvidia_gpu_available():
+    #nvidia-smi is a command-line utility that comes with the NVIDIA GPU display drivers. It provides information about the GPU, including its utilization, temperature, and memory usage.
+    # If the command is not found, it likely means that the NVIDIA drivers are not installed, and therefore, the system does not have an NVIDIA GPU.
+
     nvidia_smi_command = "nvidia-smi --query-gpu count --format=csv"
     nvidia_smi_command_list = nvidia_smi_command.split()
     try:
@@ -38,15 +40,53 @@ def install_dependencies():
             os.system("winget install cuda")  # Assuming you use winget, adjust command as necessary
         elif platform.system() == "Darwin":  # macOS
             os.system("brew install cuda")
-        else:  # Linux
+        else:  # Linux (Ubuntu, Fedora, Arch, etc.)
+            # Determine the package manager type on current Linux
+            package_manager = None
+            if os.path.exists("/usr/bin/apt-get"):
+                package_manager = "apt-get"
+            elif os.path.exists("/usr/bin/yum"):
+                package_manager = "yum"
+            elif os.path.exists("/usr/bin/pacman"):
+                package_manager = "pacman"
+            else:
+                raise EnvironmentError("Unsupported package manager")
+
+            # Install CUDA using the determined package manager
+            if package_manager == "apt-get":
+                os.system("sudo apt-get update")
+                os.system("sudo apt-get install -y cuda")
+            elif package_manager == "yum":
+                os.system("sudo yum update")
+                os.system("sudo yum install -y cuda")
+            elif package_manager == "pacman":
+                os.system("sudo pacman -Syu")
+                os.system("sudo pacman -S --noconfirm cuda")
             os.system("sudo apt-get install cuda")
         
     else:
+
         print("No GPU detected")
     
     # once CUDA is installed, you can install any cuda- leveraging libraries - use poetry install
     
-                  
+        print("No GPU detected. Installing CPU-only TensorFlow...")
+        tensorflow_version = "tensorflow==2.10.0"
+        io_version = "tensorflow-io-gcs-filesystem==0.29.0"
+
+    # Install the packages
+    subprocess.check_call([sys.executable, '-m', 'pip', 'install', tensorflow_version])
+    subprocess.check_call([sys.executable, '-m', 'pip', 'install', io_version])
+
+    #specific to WIndows
+    if platform.system() == "Windows":
+        print("Installing tqdm on Windows...")
+        subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'tqdm'])
+        print("No GPU detected")
+    
+    # once CUDA is installed, you can install any cuda- leveraging libraries like
+    # tensorflow, keras , torch - handled in pyproject.toml (poetry install)
+
 def run_command(command):
     result = subprocess.run(command, shell=True)
     if result.returncode != 0:
@@ -57,20 +97,6 @@ def remove_if_installed(package):
     if result.returncode == 0:
         print(f"Removing {package}...")
         run_command(f"pip uninstall -y {package}")
-
-
-# if is_nvidia_gpu_available():
-#     print("Nvidia GPU found. Installing CUDA-supported PyTorch...")
-#     #run_command("poetry add torch torchvision torchaudio")
-# else:
-#     print("No Nvidia GPU found. Installing CPU-only PyTorch...")
-    # for package in ["torch", "torchvision", "torchaudio"]:
-    #     remove_if_installed(package)
-
-    # tensorflow-cpu and tensorflow-gpu are not supported started from 2.17.0. Instead , use tensorflow 
-    # and in addition install CUDA if relevant so that tensorflow will be able to leverage it
-    # run_command("pip install torch==2.0.0+cpu torchvision==0.15.1+cpu torchaudio==2.0.0+cpu tensorflow-cpu==2.17.0 -f https://download.pytorch.org/whl/cpu/torch_stable.html")
-    # run_command("pip install numpy==1.23.5")  # Ensure compatible numpy version
 
 install_dependencies()
 print("Setup complete.")
