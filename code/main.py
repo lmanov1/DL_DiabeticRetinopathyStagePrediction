@@ -8,6 +8,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from fastai.vision.all import *
+from Util.MultiPlatform import *
 import time
 
 # Define the global variable for the dataset path
@@ -21,10 +22,10 @@ DATASET_PATH = 'data/raw/'
 
 # Define the dataset structure .. to be continued for validation and test datasets
 dataset_train_structure_resized15_19 = [
-    {
-        'labels': 'labels/trainLabels15.csv',
-        'images': 'resized train 15'        
-    },
+    # {
+    #     'labels': 'labels/trainLabels15.csv',
+    #     'images': 'resized train 15'        
+    # },
     {
         'labels': 'labels/trainLabels19.csv',
         'images': 'resized train 19'        
@@ -92,32 +93,45 @@ def main():
     for key, dls in train_dataloaders.items():
 
         #1. Train the (pretrained) model
-        start_time = time.time()
-        pretrained_model.train_model(dls, epochs=10)
-        end_time = time.time()
-        print(f"==> Pretrained model training time: {end_time - start_time} seconds")
-        # Save the pretrained model weights
-        torch.save(pretrained_model.state_dict(), str(str(key)+ '_pretrained_model.pth'))
-        # Evaluate the model
-        pretrained_model.evaluate_model(dls)  
+        print("Current directory:", os.getcwd())
+        # Extract the key from the path
+        dataset_name = os.path.basename(key).split('.')[0]
+        pretrained_model_file_name = dataset_name + '_pretrained_model.pth'
+        pretrained_weigths_path = os.path.join(os.getcwd(), 'data', 'output', pretrained_model_file_name).replace('/', get_path_separator())
+        print(" \n ===>  Looking for pretrained model here", pretrained_weigths_path)     
+        # very heavy run - about 8 hours on 100% GPU - lets not run it again
+        if not os.path.exists(pretrained_weigths_path): 
 
-        # 2. Train the (inference) model
+            start_time = time.time()
+            pretrained_model.train_model(dls, epochs=10)
+            end_time = time.time()
+            print_time(start_time , end_time , "Pretrained model training time")
+            # Save the pretrained model weights                   
+            torch.save(pretrained_model.state_dict(), pretrained_weigths_path)
+            print(" ===>  Saving pretrained model to ", pretrained_weigths_path)     
+            # Evaluate the model
+            pretrained_model.evaluate_model(dls)  
+
+        # 2. Train model
         # Load the pretrained weights into the main model
-        #inf_model.load_state_dict(torch.load(str(str(key)+ '_pretrained_model.pth')))
+        inf_model.load_state_dict(torch.load(pretrained_weigths_path))
         learn = Learner(dls, inf_model, loss_func=criterion, metrics=accuracy)
         #Training (fit_one_cycle): We use fit_one_cycle for training the model from scratch, as it’s more suited 
         # for models without pretrained weights.
         start_time = time.time()
         learn.fit_one_cycle(10)
         end_time = time.time()
-        print(f"==> CNN model training time: {end_time - start_time} seconds")
-        torch.save(pretrained_model.state_dict(), str(str(key)+ '_inference_model.pth'))
+        print_time(start_time , end_time , "CNN model training time")
+        # Save the trained model weights
+        trained_model_file_name = dataset_name + '_trained_model.pth'
+        trained_weigths_path = os.path.join(os.getcwd(), 'data', 'output', trained_model_file_name).replace('/', get_path_separator())        
+        print(" ===> Saving train model to ", trained_weigths_path)
+        torch.save(inf_model.state_dict(), trained_weigths_path )
+        inf_model.evaluate_model(dls)
         # Evaluate the model  - Uses ClassificationInterpretation to plot the confusion matrix and the top losses.
-        interp = ClassificationInterpretation.from_learner(learn)
-        interp.plot_confusion_matrix()
-        interp.plot_top_losses(k=9, nrows=3)                              
-
-    #print("Model and data are set up and ready!")
+        # interp = ClassificationInterpretation.from_learner(learn)
+        # interp.plot_confusion_matrix()
+        # interp.plot_top_losses(k=9, nrows=3)
 
 
 # Call the main function

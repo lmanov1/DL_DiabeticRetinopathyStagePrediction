@@ -5,7 +5,8 @@ import sys
 
 def is_nvidia_gpu_available():
 
-    #nvidia-smi is a command-line utility that comes with the NVIDIA GPU display drivers. It provides information about the GPU, including its utilization, temperature, and memory usage. If the command is not found, it likely means that the NVIDIA drivers are not installed, and therefore, the system does not have an NVIDIA GPU.
+    #nvidia-smi is a command-line utility that comes with the NVIDIA GPU display drivers. It provides information about the GPU, including its utilization, temperature, and memory usage.
+    # If the command is not found, it likely means that the NVIDIA drivers are not installed, and therefore, the system does not have an NVIDIA GPU.
     nvidia_smi_command = "nvidia-smi --query-gpu count --format=csv"
     nvidia_smi_command_list = nvidia_smi_command.split()
     try:
@@ -38,13 +39,35 @@ def install_dependencies():
             os.system("winget install cuda")  # Assuming you use winget, adjust command as necessary
         elif platform.system() == "Darwin":  # macOS
             os.system("brew install cuda")
-        else:  # Linux
+        else:  # Linux (Ubuntu, Fedora, Arch, etc.)
+            # Determine the package manager type on current Linux
+            package_manager = None
+            if os.path.exists("/usr/bin/apt-get"):
+                package_manager = "apt-get"
+            elif os.path.exists("/usr/bin/yum"):
+                package_manager = "yum"
+            elif os.path.exists("/usr/bin/pacman"):
+                package_manager = "pacman"
+            else:
+                raise EnvironmentError("Unsupported package manager")
+
+            # Install CUDA using the determined package manager
+            if package_manager == "apt-get":
+                os.system("sudo apt-get update")
+                os.system("sudo apt-get install -y cuda")
+            elif package_manager == "yum":
+                os.system("sudo yum update")
+                os.system("sudo yum install -y cuda")
+            elif package_manager == "pacman":
+                os.system("sudo pacman -Syu")
+                os.system("sudo pacman -S --noconfirm cuda")
             os.system("sudo apt-get install cuda")
         
     else:
         print("No GPU detected")
     
-    # once CUDA is installed, you can install any cuda- leveraging libraries - use poetry install
+    # once CUDA is installed, you can install any cuda- leveraging libraries like
+    # tensorflow, keras , torch - handled in pyproject.toml (poetry install)
     
                   
 def run_command(command):
