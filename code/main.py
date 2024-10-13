@@ -11,9 +11,7 @@ from fastai.vision.all import *
 from Util.MultiPlatform import *
 import time
 
-# Define the global variable for the dataset path
-DATASET_PATH = '/path/to/your/dataset'
-
+# Define the dataset names and paths
 # Choose here the dataset(s) you want to download (https://www.kaggle.com/search?q=APTOS+2019+Blindness+Detection+Dataset+in%3Adatasets)
 # Dataset names can be found under the  https://www.kaggle.com/datasets page
 DATASET_NAME_resized15_19 = 'benjaminwarner/resized-2015-2019-blindness-detection-images'   # 18.75 GB  
@@ -101,7 +99,7 @@ def main():
         print(" \n ===>  Looking for pretrained model here", pretrained_weigths_path)      # 513 MB
         # very heavy run - about 8 hours on 100% GPU - lets not run it again
         if not os.path.exists(pretrained_weigths_path): 
-
+            print("Pretrained model not found - training now...")
             start_time = time.time()
             pretrained_model.train_model(dls, epochs=10)
             end_time = time.time()
@@ -116,12 +114,12 @@ def main():
             print("Going to train CNN model...")
         # 2. Train model
         # Load the pretrained weights into the main model
-        # inf_model.load_state_dict(torch.load(pretrained_weigths_path)) - doesn't work need to see how to load the weights
-        learn = Learner(dls, inf_model, loss_func=criterion, metrics=accuracy)
+        # inf_model.load_state_dict(torch.load(pretrained_weigths_path)) - doesn't work need to see how to load the weights        
+        inf_learner = inf_model.get_learner(dls, criterion, accuracy)
         #Training (fit_one_cycle): We use fit_one_cycle for training the model from scratch, as it’s more suited 
         # for models without pretrained weights.
         start_time = time.time()
-        learn.fit_one_cycle(10)
+        inf_learner.fit_one_cycle(10)
         end_time = time.time()
         print_time(start_time , end_time , "CNN model training time")
         # Save the trained model weights
@@ -129,12 +127,7 @@ def main():
         trained_weigths_path = os.path.join(os.getcwd(), 'data', 'output', trained_model_file_name).replace('/', get_path_separator())        
         print(" ===> Saving train model to ", trained_weigths_path)
         torch.save(inf_model.state_dict(), trained_weigths_path )
-        inf_model.evaluate_model(dls) 
-        # Evaluate the model  - Uses ClassificationInterpretation to plot the confusion matrix and the top losses.
-        # interp = ClassificationInterpretation.from_learner(learn)
-        # interp.plot_confusion_matrix()
-        # interp.plot_top_losses(k=9, nrows=3)
-
+        inf_model.evaluate_model(dls)    
 
 # Call the main function
 if __name__ == "__main__":
