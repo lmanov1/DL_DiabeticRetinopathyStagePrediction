@@ -5,15 +5,22 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c113a973-520e-4a47-abb6-ae8cef413f37" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/code/Util/MultiPlatform.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Docs/SOW_1.0.docx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Docs/System_SRS_1.0.docx" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/Util/KaggleJSON.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/Util/MultiPlatform.py" beforeDir="false" afterPath="$PROJECT_DIR$/code/Util/MultiPlatform.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/code/Util/check_hardware_and_install.py" beforeDir="false" afterPath="$PROJECT_DIR$/code/Util/check_hardware_and_install.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/data/Dataloader.py" beforeDir="false" afterPath="$PROJECT_DIR$/code/data/Dataloader.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/data/data_preparation.py" beforeDir="false" afterPath="$PROJECT_DIR$/code/data/data_preparation.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/code/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/code/main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/code/models/train_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/code/models/train_model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/kaggle.json" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/poetry.lock" beforeDir="false" afterPath="$PROJECT_DIR$/poetry.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pyproject.toml" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -47,20 +54,21 @@
     &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
     &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
     &quot;Python.Dataloader.executor&quot;: &quot;Run&quot;,
-    &quot;Python.KaggleJSON.executor&quot;: &quot;Run&quot;,
     &quot;Python.check_hardware_and_install.executor&quot;: &quot;Run&quot;,
     &quot;Python.main.executor&quot;: &quot;Run&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;Guy__branch__Intel__CPU&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;Lidi__branch__abstract&quot;,
     &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/DELL/Documents/GitHub/DL_DiabeticRetinopathyStagePrediction/code/Util&quot;,
     &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;
   }
 }</component>
   <component name="RecentsManager">
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="C:\Users\DELL\Documents\GitHub\DL_DiabeticRetinopathyStagePrediction\data" />
+    <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\DELL\Documents\GitHub\DL_DiabeticRetinopathyStagePrediction\code\Util" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\DELL\Documents\GitHub\DL_DiabeticRetinopathyStagePrediction\code" />
     </key>
   </component>
@@ -84,5 +92,68 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/code/main.py</url>
+          <line>223</line>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/code/data/data_preparation.py</url>
+          <line>82</line>
+          <option name="timeStamp" value="5" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/code/main.py</url>
+          <line>142</line>
+          <option name="timeStamp" value="6" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/code/main.py</url>
+          <line>108</line>
+          <option name="timeStamp" value="12" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/code/data/Dataloader.py</url>
+          <line>32</line>
+          <option name="timeStamp" value="13" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/code/data/Dataloader.py</url>
+          <line>29</line>
+          <option name="timeStamp" value="14" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/code/data/Dataloader.py</url>
+          <line>51</line>
+          <option name="timeStamp" value="15" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/code/data/Dataloader.py</url>
+          <line>44</line>
+          <option name="timeStamp" value="16" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/code/data/Dataloader.py</url>
+          <line>42</line>
+          <option name="timeStamp" value="17" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/code/main.py</url>
+          <line>136</line>
+          <option name="timeStamp" value="18" />
+        </line-breakpoint>
+      </breakpoints>
+      <default-breakpoints>
+        <breakpoint type="python-exception">
+          <properties notifyOnTerminate="true" exception="BaseException">
+            <option name="notifyOnTerminate" value="true" />
+          </properties>
+        </breakpoint>
+      </default-breakpoints>
+    </breakpoint-manager>
   </component>
 </project>
