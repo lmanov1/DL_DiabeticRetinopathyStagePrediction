@@ -98,7 +98,7 @@ def main():
         dataset_name = os.path.basename(key).split('.')[0]
         pretrained_model_file_name = dataset_name + '_pretrained_model.pth'
         pretrained_weigths_path = os.path.join(os.getcwd(), 'data', 'output', pretrained_model_file_name).replace('/', get_path_separator())
-        print(" \n ===>  Looking for pretrained model here", pretrained_weigths_path)     
+        print(" \n ===>  Looking for pretrained model here", pretrained_weigths_path)      # 513 MB
         # very heavy run - about 8 hours on 100% GPU - lets not run it again
         if not os.path.exists(pretrained_weigths_path): 
 
@@ -111,10 +111,12 @@ def main():
             print(" ===>  Saving pretrained model to ", pretrained_weigths_path)     
             # Evaluate the model
             pretrained_model.evaluate_model(dls)  
-
+        else:
+            print(" ===>  Pretrained model already exists at ", pretrained_weigths_path)
+            print("Going to train CNN model...")
         # 2. Train model
         # Load the pretrained weights into the main model
-        inf_model.load_state_dict(torch.load(pretrained_weigths_path))
+        # inf_model.load_state_dict(torch.load(pretrained_weigths_path)) - doesn't work need to see how to load the weights
         learn = Learner(dls, inf_model, loss_func=criterion, metrics=accuracy)
         #Training (fit_one_cycle): We use fit_one_cycle for training the model from scratch, as it’s more suited 
         # for models without pretrained weights.
@@ -127,7 +129,7 @@ def main():
         trained_weigths_path = os.path.join(os.getcwd(), 'data', 'output', trained_model_file_name).replace('/', get_path_separator())        
         print(" ===> Saving train model to ", trained_weigths_path)
         torch.save(inf_model.state_dict(), trained_weigths_path )
-        inf_model.evaluate_model(dls)
+        inf_model.evaluate_model(dls) 
         # Evaluate the model  - Uses ClassificationInterpretation to plot the confusion matrix and the top losses.
         # interp = ClassificationInterpretation.from_learner(learn)
         # interp.plot_confusion_matrix()

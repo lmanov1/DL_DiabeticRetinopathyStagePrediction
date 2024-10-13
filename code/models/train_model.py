@@ -18,7 +18,8 @@ class PretrainedEyeDiseaseClassifier(nn.Module):
             num_ftrs = self.model.fc.in_features
             self.model.fc = nn.Linear(num_ftrs, num_classes)
         else:
-            raise ValueError("Unsupported pretrained model. Choose 'vgg16' or 'resnet18'.")                
+            raise ValueError("Unsupported pretrained model. Choose 'vgg16' or 'resnet18'.")        
+        self.learn = None        
 
     def forward(self, x):
         return self.model(x)
@@ -32,8 +33,9 @@ class PretrainedEyeDiseaseClassifier(nn.Module):
 
     def train_model(self, dls, epochs=10):
         """train_model initializes a Learner and uses fine_tune for training"""
-        learn = Learner(dls, self, loss_func=CrossEntropyLossFlat(), metrics=accuracy)
-        learn.fine_tune(epochs)
+        if self.learn is None:
+            self.learn = Learner(dls, self, loss_func=CrossEntropyLossFlat(), metrics=accuracy)
+        self.learn.fine_tune(epochs)
 
     def evaluate_model(self, dls):
         """initializes a Learner to generate evaluation metrics, plot the confusion matrix, and display top losses"""
@@ -63,6 +65,7 @@ class EyeDiseaseClassifier(nn.Module):
         self.conv3 = nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3, stride=1, padding=1)
         self.fc1 = nn.Linear(128 * 28 * 28, 512)
         self.fc2 = nn.Linear(512, num_classes)
+        self.learn = None
 
     def forward(self, x):
         x = F.relu(self.conv1(x))
@@ -78,3 +81,28 @@ class EyeDiseaseClassifier(nn.Module):
 
     def set_num_classes(self, num_classes):
         self.fc2 = nn.Linear(512, num_classes)
+
+    def train_model(self, dls, epochs=10):
+        """train_model initializes a Learner and uses fine_tune for training"""
+        if self.learn is None:
+            self.learn = Learner(dls, self, loss_func=CrossEntropyLossFlat(), metrics=accuracy)
+        self.learn.fit_one_cycle(epochs)
+
+    def evaluate_model(self, dls):
+        """initializes a Learner to generate evaluation metrics, plot the confusion matrix, and display top losses"""
+        if self.learn is None:
+            self.learn = Learner(dls, self, loss_func=CrossEntropyLossFlat(), metrics=accuracy)                 
+        interp = ClassificationInterpretation.from_learner(self.learn)
+        interp.plot_confusion_matrix()
+        interp.plot_top_losses(k=9, nrows=3)
+
+        preds, targets = self.learn.get_preds()
+        preds = torch.argmax(preds, dim=1)
+
+        # Calculate and print metrics
+        # Accuracy, Classification Report, Confusion Matrix
+        print(f'Accuracy: {accuracy_score(targets, preds):.4f}')
+        print('Classification Report:')
+        print(classification_report(targets, preds))
+        print('Confusion Matrix:')
+        print(confusion_matrix(targets, preds))
