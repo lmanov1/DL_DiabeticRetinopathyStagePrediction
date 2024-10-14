@@ -4,6 +4,12 @@ This repo hosts a final DL project conducted as a part of data scientist certifi
 
 
 ## Getting started
+
+Tested with:     
+python 3.10.12 (must be active version on your system) - if you have another python version , use `poetry update`     instead of `poetry install` during the step 5 - and does not commit poetry.lock afterwards!     
+poetry 1.8.3    
+pip 24.2    
+
 1. Pre-requirements: 
     - Be sure you have poetry installed in your environment    
     - If you have GPU card (NVidia), be sure you have nvidia-smi cli installed         
@@ -11,16 +17,11 @@ This repo hosts a final DL project conducted as a part of data scientist certifi
     `git clone git@github.com:lmanov1/DL_DiabeticRetinopathyStagePrediction.git`
 3. If you have GPU on your system : run CUDA setup: this should detect GPU and install supporting python system libraries (unsupported by poetry) like CUDA     
     `python3 code/Util/check_hardware_and_install.py`    
-4. Run `poetry init` (just once)
-5. Run `poetry install` (just once)     
+4. Run `poetry install` (just once)     
     Don't worry , without available GPU (and CUDA) , tensorflow, torch and rest of libraries leveraging GPU will automatically use the CPU.     
-6. Run `poetry shell`
+5. Run `poetry shell`
 
-Tested with: python 3.10 (must be active version on your system)
-poetry 1.8.3
-pip 24.2
-
-7.  About Kaggle API  
+6.  About Kaggle API  
     We use Kaggle API to download datasets from Kaggle.           
     To use the Kaggle API, sign up for a Kaggle account at https://www.kaggle.com     
     Then go to the 'Account' tab of your user profile (https://www.kaggle.com/<username>/account) and select 'Create API Token'. This will trigger the download of kaggle.json, a file containing your API credentials. Place this file in the location appropriate for your operating system:
@@ -37,7 +38,7 @@ pip 24.2
     export KAGGLE_KEY=xxxxxxxxxxxxxx
     In addition, you can export any other configuration value that normally would be in the kaggle.json in the format 'KAGGLE_' (note uppercase).
 
-8. Now you all set and can run project logics , for example       
+7. Now you all set and can run project logics , for example       
         
     `poetry run python3 /code/main.py`  
 
