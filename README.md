@@ -9,12 +9,18 @@ This repo hosts a final DL project conducted as a part of data scientist certifi
     - If you have GPU card (NVidia), be sure you have nvidia-smi cli installed         
 2. clone the repo  , go to the cloned directory   
     `git clone git@github.com:lmanov1/DL_DiabeticRetinopathyStagePrediction.git`
-3. Run setup: this should detect GPU and install supporting python system libraries (unsupported by poetry) like CUDA     
+3. If you have GPU on your system : run CUDA setup: this should detect GPU and install supporting python system libraries (unsupported by poetry) like CUDA     
     `python3 code/Util/check_hardware_and_install.py`    
-4. Run `poetry install` (just once)     
+4. Run `poetry init` (just once)
+5. Run `poetry install` (just once)     
     Don't worry , without available GPU (and CUDA) , tensorflow, torch and rest of libraries leveraging GPU will automatically use the CPU.     
-5. Run `poetry shell`
-6.  About Kaggle API  
+6. Run `poetry shell`
+
+Tested with: python 3.10 (must be active version on your system)
+poetry 1.8.3
+pip 24.2
+
+7.  About Kaggle API  
     We use Kaggle API to download datasets from Kaggle.           
     To use the Kaggle API, sign up for a Kaggle account at https://www.kaggle.com     
     Then go to the 'Account' tab of your user profile (https://www.kaggle.com/<username>/account) and select 'Create API Token'. This will trigger the download of kaggle.json, a file containing your API credentials. Place this file in the location appropriate for your operating system:
@@ -31,7 +37,7 @@ This repo hosts a final DL project conducted as a part of data scientist certifi
     export KAGGLE_KEY=xxxxxxxxxxxxxx
     In addition, you can export any other configuration value that normally would be in the kaggle.json in the format 'KAGGLE_' (note uppercase).
 
-7. Now you all set and can run project logics , for example       
+8. Now you all set and can run project logics , for example       
         
     `poetry run python3 /code/main.py`  
 
