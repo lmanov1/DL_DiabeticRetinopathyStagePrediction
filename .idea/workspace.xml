@@ -5,9 +5,62 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c113a973-520e-4a47-abb6-ae8cef413f37" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/code/Util/kaggle.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/code/data/Dataloader.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my_code/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my_code/Util/MultiPlatform.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my_code/Util/MultiPlatform.py.orig" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my_code/Util/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my_code/Util/check_hardware_and_install.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my_code/Util/check_hardware_and_install.py.orig" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my_code/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my_code/analysis/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my_code/analysis/analysis.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my_code/data/Dataloader.py.orig" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my_code/data/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my_code/data/data/raw/resized-2015-2019-blindness-detection-images.zip" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my_code/data/dataPreparation.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my_code/data/data_preprocessing.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my_code/data/data_preprocessing.py.orig" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my_code/data/dataloader.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my_code/data/raw/benjaminwarner/resized-2015-2019-blindness-detection-images/10000_left.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my_code/data/raw/benjaminwarner/resized-2015-2019-blindness-detection-images/10000_right.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my_code/data/raw/benjaminwarner/resized-2015-2019-blindness-detection-images/10001_left.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my_code/data/raw/benjaminwarner/resized-2015-2019-blindness-detection-images/10001_right.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my_code/data/raw/benjaminwarner/resized-2015-2019-blindness-detection-images/10002_left.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my_code/data/raw/benjaminwarner/resized-2015-2019-blindness-detection-images/10002_right.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my_code/data/raw/benjaminwarner/resized-2015-2019-blindness-detection-images/10004_left.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my_code/data/raw/benjaminwarner/resized-2015-2019-blindness-detection-images/10004_right.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my_code/data/raw/benjaminwarner/resized-2015-2019-blindness-detection-images/10005_left.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my_code/data/raw/benjaminwarner/resized-2015-2019-blindness-detection-images/10005_right.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my_code/data/raw/benjaminwarner/resized-2015-2019-blindness-detection-images/10006_left.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my_code/data/raw/benjaminwarner/resized-2015-2019-blindness-detection-images/10006_right.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my_code/data/raw/benjaminwarner/resized-2015-2019-blindness-detection-images/10008_left.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my_code/data/raw/benjaminwarner/resized-2015-2019-blindness-detection-images/10008_right.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my_code/data/raw/benjaminwarner/resized-2015-2019-blindness-detection-images/10011_left.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my_code/data/raw/benjaminwarner/resized-2015-2019-blindness-detection-images/10011_right.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my_code/data/raw/benjaminwarner/resized-2015-2019-blindness-detection-images/testImages19.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my_code/data/raw/benjaminwarner/resized-2015-2019-blindness-detection-images/testLabels15.csv.zip" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my_code/data/raw/benjaminwarner/resized-2015-2019-blindness-detection-images/trainLabels15.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my_code/data/raw/benjaminwarner/resized-2015-2019-blindness-detection-images/trainLabels19.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my_code/main.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my_code/main.py.orig" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my_code/models/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my_code/models/inference_model.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my_code/models/train_model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/Util/MultiPlatform.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/Util/check_hardware_and_install.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/Util/kaggle.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/__init.py__" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/analysis/analysis.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/data/Dataloader.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/data/data_preparation.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/data/data_preprocessing.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/main.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/models/inference_model.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/models/train_model.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/poetry.lock" beforeDir="false" afterPath="$PROJECT_DIR$/poetry.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pyproject.toml" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject.toml" afterDir="false" />
     </list>
@@ -43,11 +96,13 @@
     "ASKED_ADD_EXTERNAL_FILES": "true",
     "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "Python.Dataloader.executor": "Run",
+    "Python.MultiPlatform.executor": "Debug",
     "Python.check_hardware_and_install.executor": "Run",
+    "Python.dataloader.executor": "Run",
     "Python.main.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "git-widget-placeholder": "Guy__branch__Intel__CPU",
+    "git-widget-placeholder": "Lidi__branch__abstract",
     "ignore.virus.scanning.warn.message": "true",
     "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable"
   }
@@ -77,5 +132,33 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/my_code/Util/check_hardware_and_install.py</url>
+          <line>50</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/my_code/data/dataPreparation.py</url>
+          <line>91</line>
+          <option name="timeStamp" value="14" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/my_code/main.py</url>
+          <line>318</line>
+          <option name="timeStamp" value="15" />
+        </line-breakpoint>
+      </breakpoints>
+      <default-breakpoints>
+        <breakpoint type="python-exception">
+          <properties notifyOnTerminate="true" exception="BaseException">
+            <option name="notifyOnTerminate" value="true" />
+          </properties>
+        </breakpoint>
+      </default-breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

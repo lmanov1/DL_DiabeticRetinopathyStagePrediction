@@ -170,3 +170,11 @@ data/output/*
 *.orig
 .idea/misc.xml
 .idea/workspace.xml
+my_code/data/raw/benjaminwarner/resized-2015-2019-blindness-detection-images/trainLabels19.csv
+my_code/data/raw/benjaminwarner/resized-2015-2019-blindness-detection-images/testImages19.csv
+.idea/workspace.xml
+.idea/misc.xml
+.idea/workspace.xml
+my_code/data/raw/benjaminwarner/resized-2015-2019-blindness-detection-images/trainLabels15.csv
+/.idea
+/.idea
