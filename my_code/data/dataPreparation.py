@@ -1,10 +1,30 @@
+import sys
+import os
+import platform
+
+from data.dataloader import Dataloader
+
+
+def update_Global_os_param():
+    """# Add the project root directory to the Python path """
+    if platform.system() == "Windows":
+        sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+        print("Windows platform detected. -Global OS parameters updated")
+
+
+update_Global_os_param() # ref to all the Import from internal folders
+
+
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from fastai.vision.all import *
 from Util.MultiPlatform import *
 
-# This class is used to load previously downloaded data from a CSV file (for labels) and a correstponding 
+from my_code.Util.MultiPlatform import get_path_separator
+
+
+# This class is used to load previously downloaded data from a CSV file (for labels) and a correstponding
 # folder (for images)
 
 # class DataPreparation:
@@ -69,7 +89,7 @@ from Util.MultiPlatform import *
 class DataPreparation:
     def __init__(self, csv_path, img_folder,
                    valid_pct=0.2, batch_size=32, seed=42):
-        self.csv_path = csv_path
+        self.csv_path = csv_path # valid ? ('data/raw\\benjaminwarner/resized-2015-2019-blindness-detection-images', ('benjaminwarner/resized-2015-2019-blindness-detection-images', 'labels', 'trainLabels15.csv'))
         self.img_folder = img_folder + get_path_separator()      
         self.valid_pct = valid_pct
         self.batch_size = batch_size

@@ -3,17 +3,26 @@ import platform
 
 
 def get_path_separator():
-        system = platform.system()
-        if system == 'Linux' or system == 'Darwin':  # Darwin is macOS
-            separator = '/'
-        elif system == 'Windows':
-            separator = '\\'
-        else:
-            raise EnvironmentError("Unsupported operating system")
-        
-        print(f"Running on {system}. Path separator: {separator}")
-        return separator
-    
+    # return os.sep
+    system = platform.system()
+    if system == 'Linux' or system == 'Darwin':  # Darwin is macOS
+        separator = '/'
+    elif system == 'Windows':
+        separator = '\\'
+    else:
+        raise EnvironmentError("Unsupported operating system")
+
+    print(f"Running on {system}. Path separator: {separator}")
+    return separator
+
+
+def construct_path(*tokens):
+    return os.path.join(*tokens)
+
+def standardize_path(*tokens):
+    return os.path.normpath(os.path.join(*tokens))
+
+
 def get_home_directory():
     system = platform.system()
     if system == 'Linux' or system == 'Darwin':  # Darwin is macOS
