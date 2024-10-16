@@ -17,7 +17,7 @@ pip 24.2
     `git clone git@github.com:lmanov1/DL_DiabeticRetinopathyStagePrediction.git`
 3. If you have GPU on your system : run CUDA setup: this should detect GPU and install supporting python system libraries (unsupported by poetry) like CUDA     
     `python3 code/Util/check_hardware_and_install.py`    
-4. Run `poetry install` (just once)     
+4. Run `poetry update` (just once) - this will not use poetry.lock of the workspace but will rewrite it. Don't commit your poetry.lock        
     Don't worry , without available GPU (and CUDA) , tensorflow, torch and rest of libraries leveraging GPU will automatically use the CPU.     
 5. Run `poetry shell`
 
@@ -40,7 +40,7 @@ pip 24.2
 
 7. Now you all set and can run project logics , for example       
         
-    `poetry run python3 /code/main.py`  
+    `python3 /code/main.py`  Running with `poetry run python.exe /code/main.py` on Windows does problems with import fastai , so use just `python.exe /code/main.py` Don't ask why.
 
 
 ## Project Blueprint: Diabetic Retinopathy Severity Classification
