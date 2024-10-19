@@ -13,7 +13,6 @@ package-mode = false
 # torchaudio = "^2.4.1"
 
 [tool.poetry.dependencies]
-#python = "^3.10"
 python = ">=3.10,<3.12"
 flopco-pytorch = "^0.1.4"
 matplotlib = "^3.9.2"
@@ -21,15 +20,14 @@ fastai = "^2.7.17"
 seaborn = "^0.13.2"
 pandas = "^2.2.3"
 huggingface = "^0.0.1"
-tomlkit = "^0.13.2"
+#tomlkit = "^0.12.2"
 requests = "^2.32.3"
 kaggle = "^1.5.12"
-#tensorflow = "^2.17.0"
 tensorflow-io-gcs-filesystem = "^0.31.0"
 tensorflow = "*"
-#torch = "^2.4.1"
 torch = "*"
-
+gradio = "^5.1.0"
+pickle = "*"
 
 [tool.poetry.group.dev.dependencies]
 

@@ -177,4 +177,10 @@ MultiPlatform.py
 
 
 
+## Update requirements.txt
+poetry export -f requirements.txt --output requirements.txt
 
+## Production      
+app.py  - main gradio application script       
+update_production.py - upload relevant files from git to production space (`https://huggingface.co/spaces/Lmanov1/timm-efficientnet_b3.ra2_in1k`)           
+For inference models persistant storage - we use a dataset repo (`https://huggingface.co/datasets/Lmanov1/BUI17_data`)           
