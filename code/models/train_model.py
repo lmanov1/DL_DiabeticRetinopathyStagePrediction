@@ -5,6 +5,13 @@ import torchvision.models as models
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 import torch.nn.functional as F
 
+num_dr_classes = 5 
+    # 0 - No DR
+    # 1 - Mild
+    # 2 - Moderate
+    # 3 - Severe
+    # 4 - Proliferative DR
+
 class CustomModelMethods:
     """CustomModelMethods is a base class that defines methods for training and evaluating a model"""
     def __init__(self):
@@ -21,6 +28,13 @@ class CustomModelMethods:
         if self.class_learner is None:
             self.class_learner = Learner(dls, self, loss_func=CrossEntropyLossFlat(), metrics=accuracy)
         self.class_learner.fine_tune(epochs)
+
+    def predict(self, img_path):
+        """predict uses Learner's predict method to make predictions"""
+        if self.class_learner is None:
+            raise ValueError("Model has not been trained yet. Please train the model first.")
+        img = PILImage.create(img_path)
+        return self.class_learner.predict
 
     def evaluate_model(self, dls):
         """Uses Learner to generate evaluation metrics, plot the confusion matrix, and display top losses"""
@@ -99,3 +113,17 @@ class EyeDiseaseClassifier(nn.Module,CustomModelMethods):
 
     def set_num_classes(self, num_classes):
         self.fc2 = nn.Linear(512, num_classes)    
+
+
+
+def load_model_from_pth(model , weigths_path):
+    """Load a pretrained model from a file"""
+    #model = PretrainedEyeDiseaseClassifier(num_classes=num_dr_classes, pretrained_model=pretrained_models[0])
+    model.load_state_dict(torch.load(weigths_path, weights_only=True,map_location=torch.device('cpu') ))
+    model.eval() # Set dropout and batch normalization layers to evaluation mode before running inference
+    return model
+
+
+def load_model_from_pkl(file_path):
+    """Load a pretrained model from a file"""
+    return load_learner(file_path)
