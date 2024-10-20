@@ -41,8 +41,8 @@ class CustomModelMethods:
         if self.class_learner is None:
             self.class_learner = Learner(dls, self, loss_func=CrossEntropyLossFlat(), metrics=accuracy)
         interp = ClassificationInterpretation.from_learner(self.class_learner)
-        interp.plot_confusion_matrix()
-        interp.plot_top_losses(k=9, nrows=3)
+        #interp.plot_confusion_matrix()
+        #interp.plot_top_losses(k=9, nrows=3)
         preds, targets = self.class_learner.get_preds()
         preds = torch.argmax(preds, dim=1)
         # Calculate and print metrics
@@ -115,7 +115,7 @@ class EyeDiseaseClassifier(nn.Module,CustomModelMethods):
         self.fc2 = nn.Linear(512, num_classes)    
 
 
-
+MODEL_FORMAT = ['pth', 'pkl', 'keras']  # pth - pytorch model, pkl - fastai model
 def load_model_from_pth(model , weigths_path):
     """Load a pretrained model from a file"""
     #model = PretrainedEyeDiseaseClassifier(num_classes=num_dr_classes, pretrained_model=pretrained_models[0])

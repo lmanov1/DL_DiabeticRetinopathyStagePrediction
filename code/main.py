@@ -1,6 +1,6 @@
 import os
 #from models import inference_model as Neural_Net
-from models.train_model import EyeDiseaseClassifier , PretrainedEyeDiseaseClassifier , load_model_from_pkl  ,pretrained_models , num_dr_classes
+from models.train_model import EyeDiseaseClassifier , PretrainedEyeDiseaseClassifier , load_model_from_pkl  ,pretrained_models , num_dr_classes ,MODEL_FORMAT
 from data import data_preparation as DataPrep
 #from data import data_preprocessing as data_preprocessing
 from data import Dataloader as KaggleDataLoader
@@ -53,7 +53,7 @@ def download_from_kaggle(dataset_name, dataset_path , kaggle_json_path=None):
     return kaggle_downloader.dataset_dir
 
 
-MODEL_FORMAT = ['pth', 'pkl']  # pth - pytorch model, pkl - fastai model
+
 def get_saved_model_name(dataset_name, model_type, model_name_prefix = ""):
     """Returns the name of the saved model file."""
 
@@ -108,8 +108,6 @@ def main():
     pretrained_model.to(device)
     
     for key, dls in train_dataloaders.items():
-        # print("Key:", key)
-        # print("Dataloaders:", dls)
         #1. Fine tune the (pretrained) model
         print("Current directory:", os.getcwd())
         # Extract the key from the path
@@ -128,8 +126,7 @@ def main():
             print_time(start_time , end_time , "Pretrained model training time")
             # Evaluate the model
             pretrained_model.evaluate_model(dls)  
-            # Save the pretrained model weights 
-            
+            # Save the pretrained model weights             
             best_model_state = deepcopy(pretrained_model.state_dict())  # don't save the pointer in memory but the entire object
             torch.save(best_model_state, pretrained_weigths_path)
             print(" ===>  Saving pretrained model to ", pretrained_weigths_path)                                     
@@ -141,34 +138,34 @@ def main():
 
         else:           
             print(" ===>  Pretrained model already exists at ", pretrained_weigths_path)
-            inf_learner = load_model_from_pkl(pretrained_pkl)
-            inf_learner.model.eval()            
-            pred, idx, probs = inf_learner.predict("data/raw/benjaminwarner/resized-2015-2019-blindness-detection-images/resized train 19/664b1f9a2087.jpg")            
-            print(f"Prediction: {pred}; Probability: {probs[idx]:.04f}")
-            print(inf_learner.dls.vocab)
+            # inf_learner = load_model_from_pkl(pretrained_pkl)
+            # inf_learner.model.eval()            
+            # pred, idx, probs = inf_learner.predict("data/raw/benjaminwarner/resized-2015-2019-blindness-detection-images/resized train 19/664b1f9a2087.jpg")            
+            # print(f"Prediction: {pred}; Probability: {probs[idx]:.04f}")
+            # print(inf_learner.dls.vocab)
         
-        #print("Going to train CNN model...")         
-                
-        # # 2. Train model      
-        # inf_learner = inf_model.get_learner(dls, criterion, accuracy)
-        # #Training (fit_one_cycle): We use fit_one_cycle for training the model from scratch, as it’s more suited 
-        # # for models without pretrained weights.
-        # start_time = time.time()
-        # inf_learner.fit_one_cycle(10)
-        # end_time = time.time()
-        # print_time(start_time , end_time , "CNN model training time")
-        # inf_model.evaluate_model(dls)    
-        # # Save the trained model weights        
-        # trained_weigths_path  = get_saved_model_name(dataset_name, 'pth', "trained_")        
-        # print(" ===> Saving CNN train model to ", trained_weigths_path)
-        # best_model_state = deepcopy(inf_model.state_dict())  # don't save the pointer in memory but the entire object
-        # torch.save(best_model_state, trained_weigths_path )
-        # print(" ===>  Saving pretrained model to ", trained_weigths_path) 
-        # pretrained_pkl  = get_saved_model_name(dataset_name, 'pkl', 'trained_')
-        # print(" ===>  Exporting pretrained model to ", pretrained_pkl)           
-        # inf_model.get_learner().export(pretrained_pkl)
-       
-   
+        print("Going to train CNN model...")                
+        # 2. Train model      
+        inf_learner = inf_model.get_learner(dls, criterion, accuracy)
+        #Training (fit_one_cycle): We use fit_one_cycle for training the model from scratch, as it’s more suited 
+        # for models without pretrained weights.
+        start_time = time.time()
+        inf_learner.fit_one_cycle(10)
+        end_time = time.time()
+        print_time(start_time , end_time , "CNN model training time")
+        inf_model.evaluate_model(dls)    
+        # Save the trained model weights        
+        trained_weigths_path  = get_saved_model_name(dataset_name, 'pth', "trained_")        
+        print(" ===> Saving CNN train model to ", trained_weigths_path)
+        best_model_state = deepcopy(inf_model.state_dict())  # don't save the pointer in memory but the entire object
+        torch.save(best_model_state, trained_weigths_path )
+        print(" ===>  Saving pretrained model to ", trained_weigths_path) 
+
+        ptrained_learn = inf_model.get_learner(dls, criterion, accuracy)   
+        pretrained_pkl  = get_saved_model_name(dataset_name, 'pkl', 'trained_')
+        print(" ===>  Exporting pretrained model to ", pretrained_pkl)           
+        ptrained_learn.export(pretrained_pkl)
+          
 
 # Call the main function
 if __name__ == "__main__":

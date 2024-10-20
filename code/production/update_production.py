@@ -1,11 +1,17 @@
 from huggingface_hub import HfApi, login  
 import os
 from pathlib import Path
-from all_defs import DATASET_REPO_ID , MODEL_DATASET_PATH  , REPO_ID , MODEL_LOCAL_FILE_PATH
+from all_defs import DATASET_REPO_ID , MODEL_DATASET_DIR  , REPO_ID , download_from_gdrive , \
+MODEL_LOCAL_DIR , models_download_from_drive , models_upload_to_dataset , DRIVE_MODELS_URL
+from environs import Env
 
-# Log in to Hugging Face
-MY_TOKEN = "MY TOKEN TP PUT HERE EEEE"
-login(token=MY_TOKEN)
+env = Env()
+env.read_env()  # This loads the .env file
+
+# Access the secret
+api_token = os.getenv("MY_TOKEN")
+# Log in to Hugging Face Hub
+login(token=api_token)
 
 files_to_upload = [
     { "../../pyproject.toml": "./pyproject.toml"},
@@ -34,20 +40,35 @@ print(f"Uploaded files to {REPO_ID}")
 files = api.list_repo_files(repo_id=DATASET_REPO_ID, repo_type="dataset")
 print(f"Files in {DATASET_REPO_ID}: {files}")
 # Check if the file already exists in the repo
-model_file = Path(MODEL_DATASET_PATH).name
 files = [Path(file).name for file in files]
 
-if model_file in files:
-    print(f"{model_file} exists in the repo.")
-else:
-    print(f"{model_file} does not exist in the repo.")
-    print(f"Uploading {MODEL_LOCAL_FILE_PATH} to {MODEL_DATASET_PATH} on {DATASET_REPO_ID}")
+for model_file in models_upload_to_dataset:    
+    if model_file in files:
+        print(f"{model_file} exists in the repo.")
+        print(f"Will not upload {model_file} to {MODEL_DATASET_DIR} on {DATASET_REPO_ID}")
+    else:
+        print(f"{model_file} does not exist in the repo.")
+        print(f"Uploading {model_file} to {MODEL_DATASET_DIR} on {DATASET_REPO_ID}")
 
-    api.upload_file(
-        repo_id=DATASET_REPO_ID,
-        repo_type="dataset",    
-        path_or_fileobj=MODEL_LOCAL_FILE_PATH,
-        path_in_repo=str(MODEL_DATASET_PATH)
+
+        # Check if the model file exists in the local directory
+        model_file_path = Path(MODEL_LOCAL_DIR) / model_file
+        if not model_file_path.exists():
+            print(f"{model_file} does not exist in the local directory {MODEL_LOCAL_DIR}. Checking google drive.")
+            # Download the model from Google Drive
+            if model_file in models_download_from_drive:
+                download_from_gdrive(DRIVE_MODELS_URL, model_file)
+                if not model_file_path.exists():
+                    raise FileNotFoundError(f"Model file {model_file} not found in {MODEL_LOCAL_DIR}")
+            else:
+                print(f"Model file {model_file} not found in {MODEL_LOCAL_DIR} , skipping upload.")
+                continue
+
+        api.upload_file(
+            repo_id=DATASET_REPO_ID,
+            repo_type="dataset",    
+            path_or_fileobj=model_file_path,
+            path_in_repo=f"{MODEL_DATASET_DIR}/{model_file}"
 )
 
 

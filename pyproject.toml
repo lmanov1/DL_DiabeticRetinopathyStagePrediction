@@ -27,10 +27,9 @@ tensorflow-io-gcs-filesystem = "^0.31.0"
 tensorflow = "*"
 torch = "*"
 gradio = "^5.1.0"
-pickle = "*"
-
-[tool.poetry.group.dev.dependencies]
-
+#pickle = "*"
+environs = "^11.0.0"
+gdown = "^5.2.0"
 
 [build-system]
 requires = ["poetry-core"]

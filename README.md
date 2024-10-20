@@ -181,6 +181,8 @@ MultiPlatform.py
 poetry export -f requirements.txt --output requirements.txt
 
 ## Production      
-app.py  - main gradio application script       
+app.py  - main gradio application script.
+Leverages existing        
 update_production.py - upload relevant files from git to production space (`https://huggingface.co/spaces/Lmanov1/timm-efficientnet_b3.ra2_in1k`)           
-For inference models persistant storage - we use a dataset repo (`https://huggingface.co/datasets/Lmanov1/BUI17_data`)           
+For inference models persistant storage - we use a dataset repo (`https://huggingface.co/datasets/Lmanov1/BUI17_data`) 
+To run  `update_production.py` there is a need to login to Hagging face with  a valid Hugging face API TOKEN. Currently token value being read from .env file where it should be stored in format:  MY_TOKEN="PUT HERE YOUR KEY".  This file is not managed by git , but local in the root directory of the project.
