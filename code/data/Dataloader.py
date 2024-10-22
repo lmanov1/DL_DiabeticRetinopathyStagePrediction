@@ -5,18 +5,35 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from kaggle.api.kaggle_api_extended import KaggleApi
 from Util.MultiPlatform import *
-#import json
-
 
 class KaggleDataDownLoader:
     def __init__(self, dataset_path , dataset_name, kaggle_json_path = None):
         self.dataset_name = dataset_name
         self.dataset_path = dataset_path
         self.kaggle_json_path = kaggle_json_path
-        print(f"dataset_path {self.dataset_path} dataset {self.dataset_name} , kaggle_json_path = {self.kaggle_json_path}")
-        self.create_kaggle_json()
-        self.setup_kaggle_api()
+        print(f"dataset_path {self.dataset_path} dataset {self.dataset_name} , kaggle_json_path = {self.kaggle_json_path}")        
+        self.already_downloaded = False
+        self.already_downloaded = self.construct_dataset_path()
+        if self.already_downloaded == False:
+            self.create_kaggle_json()
+            self.setup_kaggle_api()
 
+    def construct_dataset_path(self):
+        """
+        Construct the dataset path.
+        """
+        self.dataset_dir = None
+        if self.dataset_path is None:
+            raise ValueError("Invalid argument: dataset_path cannot be None")
+                           
+        self.dataset_dir = os.path.join(self.dataset_path, self.dataset_name)
+        self.dataset_dir += get_path_separator()
+        #print(f"Dataset directory: {self.dataset_dir}")
+        if os.path.isdir(self.dataset_dir):
+            print(f"Dataset {self.dataset_name} was already downloaded =========")
+            self.already_downloaded = True
+            return
+    
     def create_kaggle_json(self):
         """
         Create the Kaggle API JSON file if it doesn't exist.
@@ -51,16 +68,10 @@ class KaggleDataDownLoader:
         api.authenticate()
         print("Kaggle API setup complete")
         self.dataset_dir = os.path.join(self.dataset_path, self.dataset_name )
-        self.dataset_dir +=  get_path_separator()
-        #print(f"Dataset directory: {self.dataset_dir}")
-        if os.path.isdir(self.dataset_dir):
-            print(f"Dataset {self.dataset_name} was already downloaded =========")
-            return 
-        else:
-            print(f"Dataset {self.dataset_dir} not found - downloading dataset {self.dataset_name}" )     
-        
+        self.dataset_dir +=  get_path_separator()                
+        print(f"Downloading dataset {self.dataset_name} into {self.dataset_dir}" )             
         api.dataset_download_files(self.dataset_name, path=self.dataset_dir, unzip=True)
-        print(f"Dataset {self.dataset_name} downloaded")
+        print(f"Dataset {self.dataset_name} was successfully downloaded")
         return 
     
     def get_dataset_dir(self):
@@ -71,10 +82,4 @@ class KaggleDataDownLoader:
 
 #===============================================================================
 # Download datasets into DATASET_PATH
-# kaggle_loader = KaggleDataDownLoader(DATASET_NAME)
-# kaggle_loader.load_data(os.path.join(DATASET_PATH, 'labels'), 'trainLabels15.csv')
-# kaggle_loader.preprocess_data()
-# kaggle_loader.split_data()
-# train_data = kaggle_loader.get_train_data()
-# validation_data = kaggle_loader.get_validation_data()
-# test_data = kaggle_loader.get_test_data()
+# kaggle_loader = KaggleDataDownLoader(DATASET_NAME , DATASET_PATH)
