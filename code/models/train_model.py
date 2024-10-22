@@ -14,19 +14,23 @@ num_dr_classes = 5
 
 class CustomModelMethods:
     """CustomModelMethods is a base class that defines methods for training and evaluating a model"""
-    def __init__(self):
+    def __init__(self, model=None):
         self.class_learner = None
+        self.model = model
 
-    def get_learner(self, dls, criterion, metrics):
+    def get_learner(self):
         """get_learner initializes a Learner"""
         if self.class_learner is None:
-            self.class_learner = Learner(dls, self, loss_func=criterion, metrics=metrics)
+            raise ValueError("Model has not been trained yet. Please train the model first.")
         return self.class_learner
+    
+    def set_learner(self, learner):
+        self.class_learner = learner
 
     def train_model(self, dls, epochs=10):
         """train_model uses Learner's fine_tune method for training"""
         if self.class_learner is None:
-            self.class_learner = Learner(dls, self, loss_func=CrossEntropyLossFlat(), metrics=accuracy)
+            self.class_learner = Learner(dls, self.model, loss_func=CrossEntropyLossFlat(), metrics=accuracy)
         self.class_learner.fine_tune(epochs)
 
     def predict(self, img_path):
@@ -34,16 +38,19 @@ class CustomModelMethods:
         if self.class_learner is None:
             raise ValueError("Model has not been trained yet. Please train the model first.")
         img = PILImage.create(img_path)
-        return self.class_learner.predict
+        return self.class_learner.predict(img)
 
-    def evaluate_model(self, dls):
+    #Evaluation is for assessing final model performance on unseen data (test set).
+    def evaluate_model(self, learner, test_dls):
         """Uses Learner to generate evaluation metrics, plot the confusion matrix, and display top losses"""
-        if self.class_learner is None:
-            self.class_learner = Learner(dls, self, loss_func=CrossEntropyLossFlat(), metrics=accuracy)
-        interp = ClassificationInterpretation.from_learner(self.class_learner)
+        if learner is None:
+             raise ValueError("Model has not been trained yet. Please train the model first.")
+        
+        learner.dls = test_dls
+        interp = ClassificationInterpretation.from_learner(learner)
         #interp.plot_confusion_matrix()
         #interp.plot_top_losses(k=9, nrows=3)
-        preds, targets = self.class_learner.get_preds()
+        preds, targets = learner.get_preds()
         preds = torch.argmax(preds, dim=1)
         # Calculate and print metrics
         print(f'Accuracy: {accuracy_score(targets, preds):.4f}')
@@ -51,9 +58,16 @@ class CustomModelMethods:
         print(classification_report(targets, preds))
         print('Confusion Matrix:')
         print(confusion_matrix(targets, preds))
+        
 
-
-pretrained_models = ['vgg16', 'resnet18']
+# vgg16: The standard VGG16 model without batch normalization.
+# vgg16_bn: This version includes batch normalization layers after each convolutional layer, 
+# which helps in stabilizing and accelerating the training process.
+# resnet18: A smaller version of the ResNet model with 18 layers.
+# resnet34: A larger version of the ResNet model with 34 layers.
+# dense121: A smaller version of the DenseNet model with 121 layers.
+# 224x224 pixel images were used for training all the above models thus the input size is 224x224x3 for all models after resizing and aug_transforms with DataBlocks.
+pretrained_models = ['vgg16', 'resnet18', 'vgg16_bn', 'resnet34', 'resnet50', 'densenet121']
 
 # PretrainedEyeDiseaseClassifier defines a pretrained vision model, either resnet18 or vgg16 model.
 class PretrainedEyeDiseaseClassifier(nn.Module , CustomModelMethods):
@@ -61,19 +75,36 @@ class PretrainedEyeDiseaseClassifier(nn.Module , CustomModelMethods):
        for transfer learning and/or as a reference point for performance evaluation of a (train) model under development.
        It can be any model out of the collection supported by torchvision.models - welcome to replace it and refactor this class!
     """
-    def __init__(self, num_classes=5, pretrained_model='vgg16'):        
+    def __init__(self, num_classes=5, model_name='vgg16'):        
         nn.Module.__init__(self)
-        CustomModelMethods.__init__(self)
-
-        if pretrained_model == 'vgg16':
+        CustomModelMethods.__init__(self,model_name)
+        if model_name not in pretrained_models:
+            raise ValueError(f"Unsupported model name: {model_name}")
+        
+        if model_name == 'vgg16':
             self.model = models.vgg16(pretrained=True)
             self.model.classifier[6] = nn.Linear(4096, num_classes)
-        elif pretrained_model == 'resnet18':
+        elif model_name == 'vgg16_bn':
+            self.model = models.vgg16_bn(pretrained=True)
+            self.model.classifier[6] = nn.Linear(in_features=4096, out_features=num_classes)
+        elif model_name == 'resnet18':
             self.model = models.resnet18(pretrained=True)
             num_ftrs = self.model.fc.in_features
             self.model.fc = nn.Linear(num_ftrs, num_classes)
+        elif model_name == 'resnet34':
+            self.model = models.resnet34(pretrained=True)
+            num_ftrs = self.model.fc.in_features
+            self.model.fc = nn.Linear(num_ftrs, num_classes)
+        elif model_name == 'resnet50':
+            self.model = models.resnet50(pretrained=True)
+            num_ftrs = self.model.fc.in_features
+            self.model.fc = nn.Linear(num_ftrs, num_classes)
+        elif model_name == 'densenet121':
+            self.model = models.densenet121(pretrained=True)
+            num_ftrs = self.model.classifier.in_features
+            self.model.classifier = nn.Linear(num_ftrs, num_classes)
         else:
-            raise ValueError("Unsupported pretrained model. Choose 'vgg16' or 'resnet18'.")        
+            raise ValueError(f"Unsupported model name: {model_name}")
               
     def forward(self, x):
         return self.model(x)

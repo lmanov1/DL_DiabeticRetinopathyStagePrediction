@@ -2,9 +2,9 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from fastai.vision.all import *
-from Util.MultiPlatform import *
+from code.Util.MultiPlatform import *
 
-# This class is used to load previously downloaded data from a CSV file (for labels) and a correstponding 
+# This class is used to load previously downloaded data from a CSV file (for labels) and a correstponding
 # folder (for images)
 
 # This class is used to prepare image data for training and validation using the fastai library.
@@ -15,12 +15,13 @@ from Util.MultiPlatform import *
 # Get DataLoaders: Provides the DataLoaders for training and validation.
 # Show Batch: Displays a batch of images with labels for quick visualization.
 class DataPreparation:
-    def __init__(self, csv_path, img_folder,
+    def __init__(self, csv_path, img_folder, imaging_format = 'jpg',
                    valid_pct=0.2, batch_size=32, seed=42):
         self.csv_path = csv_path
-        self.img_folder = img_folder + get_path_separator()      
+        self.img_folder = img_folder + get_path_separator()
         self.valid_pct = valid_pct
         self.batch_size = batch_size
+        self.imaging_format = imaging_format
         self.seed = seed
         self.dls = None
 
@@ -29,36 +30,31 @@ class DataPreparation:
         Load data from a CSV file and create a DataBlock for image processing.
         """
         df = pd.read_csv(self.csv_path)
-        print(f"Data loaded from {self.csv_path}")               
-        df[df.columns[0]] = df[df.columns[0]].astype(str) + '.jpg'
-       
-        # Check if the image files exist    
-        missing_files = df[~df[df.columns[0]].apply(lambda x: (self.img_folder + x)).map(Path).map(Path.exists)]
-        if not missing_files.empty:
-            print(f"Missing files {missing_files.shape}:")
-            print(missing_files)
-        
-        # Remove rows with missing files
+        # Ensure the first column values include either '.jpg' or '.png' suffix (defined per dataset with self.imaging_format)
+        # Detect which files in the first column don't end with self.imaging_format and add the suffix if needed
+        df[df.columns[0]] = df[df.columns[0]].apply(lambda x: x if x.endswith(self.imaging_format) else x  + self.imaging_format)
+
+        # Check if the image files exist in img_folder and remove rows from df if not present
         df = df[df[df.columns[0]].apply(lambda x: (self.img_folder + x)).map(Path).map(Path.exists)]
-        #df.dropna(inplace=True)
         print(" df columns: ", df.columns)
-        df.info()        
-        df.head()
-        df.value_counts()
+        print(f"info: {df.info()}")
+        #print(f"head: {df.head()}")
+        #print(f"value counts: {df.value_counts()}")
+
         try:
             dblock = DataBlock(
             blocks=(ImageBlock, CategoryBlock),
             get_x=ColReader(df.columns[0], pref=self.img_folder),
             get_y=ColReader(df.columns[1]),
-            splitter=RandomSplitter(valid_pct=self.valid_pct, seed=self.seed),
+            #splitter=RandomSplitter(valid_pct=self.valid_pct, seed=self.seed), #Instead of using RandomSplitter, the training dataset is directly used without splitting
             item_tfms=Resize(460),
             batch_tfms=aug_transforms(size=224, min_scale=0.75)
-            )    
+            )
         except FileNotFoundError:
             print(f"File not found. Skipping to the next file.")
-            
             pass
-        
+
+        print(f"DataBlock created  {dblock}")
         self.dls = dblock.dataloaders(df, bs=self.batch_size)
         print(f"data loaders : {self.dls}")
 

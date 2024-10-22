@@ -4,7 +4,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from kaggle.api.kaggle_api_extended import KaggleApi
-from Util.MultiPlatform import *
+from code.Util.MultiPlatform import *
 
 class KaggleDataDownLoader:
     def __init__(self, dataset_path , dataset_name, kaggle_json_path = None):
@@ -15,6 +15,7 @@ class KaggleDataDownLoader:
         self.already_downloaded = False
         self.already_downloaded = self.construct_dataset_path()
         if self.already_downloaded == False:
+            print("Downloading dataset from Kaggle")
             self.create_kaggle_json()
             self.setup_kaggle_api()
 
@@ -28,11 +29,12 @@ class KaggleDataDownLoader:
                            
         self.dataset_dir = os.path.join(self.dataset_path, self.dataset_name)
         self.dataset_dir += get_path_separator()
-        #print(f"Dataset directory: {self.dataset_dir}")
+        print(f"Dataset directory: {self.dataset_dir}")
         if os.path.isdir(self.dataset_dir):
             print(f"Dataset {self.dataset_name} was already downloaded =========")
             self.already_downloaded = True
-            return
+            return True
+        return False
     
     def create_kaggle_json(self):
         """
