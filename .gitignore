@@ -163,3 +163,8 @@ cython_debug/
 kaggle.json
 data/raw/*
 data/output/*
+
+models/*.pth
+models/*.pkl
+models/*.keras
+
