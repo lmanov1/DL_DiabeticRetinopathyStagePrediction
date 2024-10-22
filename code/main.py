@@ -1,9 +1,9 @@
 import os
 #from models import inference_model as Neural_Net
-from models.train_model import EyeDiseaseClassifier , PretrainedEyeDiseaseClassifier , load_model_from_pkl  ,pretrained_models , num_dr_classes ,MODEL_FORMAT
-from data import data_preparation as DataPrep
+from code.models.train_model import EyeDiseaseClassifier , PretrainedEyeDiseaseClassifier , load_model_from_pkl  ,pretrained_models , num_dr_classes ,MODEL_FORMAT
+from code.data import data_preparation as DataPrep
 #from data import data_preprocessing as data_preprocessing
-from data import Dataloader as KaggleDataLoader
+from code.data import Dataloader as KaggleDataLoader
 import torch 
 import torch.nn as nn
 import torch.optim as optim
@@ -118,8 +118,14 @@ def main():
         print(" \n ===>  Looking for pretrained model here ", pretrained_weigths_path , pretrained_pkl)      # 513 MB
         
         # very heavy run - about 8 hours on 100% GPU - lets not run it again
-        if not os.path.exists(pretrained_weigths_path): 
+        if not os.path.exists(pretrained_weigths_path):
             print("Pretrained model not found - training now...")
+            # win fix - Ensure directory exists
+            directory = os.path.dirname(pretrained_weigths_path)
+            if not os.path.exists(directory):
+                os.makedirs(directory)
+
+
             start_time = time.time()
             pretrained_model.train_model(dls, epochs=10)
             end_time = time.time()
