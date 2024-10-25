@@ -210,14 +210,16 @@ def main():
 
     # Download datasets into DATASET_PATH
     kaggle_loader = download_datasets(DATASET_PATH, DATASETS)
+
+
     train_dataloaders = load_and_prepare_data(kaggle_loader, dataset_train_structure_resized15_19)
 
     # Check if CUDA is available and set the device accordingly
     device = check_cuda_availability()
 
     num_dr_classes = 5  # 0 - No DR, 1 - Mild, 2 - Moderate, 3 - Severe, 4 - Proliferative DR
-
-    pretrained_model = PretrainedEyeDiseaseClassifier(num_classes=num_dr_classes, pretrained_model=pretrained_models[0])
+    # pretrained_models[2] is  EfficientNet-B7  . [0] is the VGG16
+    pretrained_model = PretrainedEyeDiseaseClassifier(num_classes=num_dr_classes, pretrained_model=pretrained_models[2])
     criterion = nn.CrossEntropyLoss()
 
     inf_model = EyeDiseaseClassifier(num_classes=num_dr_classes)

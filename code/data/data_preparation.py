@@ -83,16 +83,20 @@ class DataPreparation:
         df = pd.read_csv(self.csv_path)
         print(f"Data loaded from {self.csv_path}")               
         df[df.columns[0]] = df[df.columns[0]].astype(str) + '.jpg'
-       
+
+        print("Checking for missing files...")
+        print("df shape Before: ", df.shape)
+
         # Check if the image files exist    
         missing_files = df[~df[df.columns[0]].apply(lambda x: (self.img_folder + x)).map(Path).map(Path.exists)]
         if not missing_files.empty:
             print(f"Missing files {missing_files.shape}:")
             print(missing_files)
-        
-        # Remove rows with missing files
-        df = df[df[df.columns[0]].apply(lambda x: (self.img_folder + x)).map(Path).map(Path.exists)]
-        #df.dropna(inplace=True)
+            # Remove rows with missing files
+            df = df[df[df.columns[0]].apply(lambda x: (self.img_folder + x)).map(Path).map(Path.exists)]
+            #df.dropna(inplace=True)
+            print("After removing missing files, df shape: ", df.shape)
+
         print(" df columns: ", df.columns)
         df.info()        
         df.head()
@@ -103,7 +107,7 @@ class DataPreparation:
             get_x=ColReader(df.columns[0], pref=self.img_folder),
             get_y=ColReader(df.columns[1]),
             splitter=RandomSplitter(valid_pct=self.valid_pct, seed=self.seed),
-            item_tfms=Resize(460),
+            item_tfms=Resize(224), # Updated it was 460
             batch_tfms=aug_transforms(size=224, min_scale=0.75)
             )    
         except FileNotFoundError:

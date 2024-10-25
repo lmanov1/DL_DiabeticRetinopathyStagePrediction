@@ -29,6 +29,7 @@ tensorflow-io-gcs-filesystem = "^0.31.0"
 tensorflow = "*"
 #torch = "^2.4.1"
 torch = "*"
+efficientnet-pytorch = "^0.7.1"
 
 
 [tool.poetry.group.dev.dependencies]

@@ -6,7 +6,7 @@ import torchvision.models as models  # Contains pre-built, pretrained models lik
 from sklearn.metrics import accuracy_score, classification_report, \
     confusion_matrix  # Used for calculating accuracy, generating classification reports, and plotting confusion matrices.
 import torch.nn.functional as F  # Functional layers, like activation functions  and utilities for the forward pass.
-
+from efficientnet_pytorch import EfficientNet
 
 # --- Overall Structure ---
 # The file defines three main classes:
@@ -104,7 +104,7 @@ class CustomModelMethods:
 
 
 # List of pretrained models we can choose from for transfer learning
-pretrained_models = ['vgg16', 'resnet18']
+pretrained_models = ['vgg16', 'resnet18', 'efficientnet-b7']
 
 
 # PretrainedEyeDiseaseClassifier allows the use of pretrained models (VGG16 or ResNet18) for eye disease classification
@@ -116,7 +116,7 @@ class PretrainedEyeDiseaseClassifier(nn.Module, CustomModelMethods):
         CustomModelMethods.__init__(
             self)  # Initialize methods for training/evaluation from the CustomModelMethods class
 
-        # Choose between VGG16 or ResNet18 pretrained models
+        # Choose between VGG16 or ResNet18 or efficientnet-b7 pretrained models
         if pretrained_model == 'vgg16':
             self.model = models.vgg16(pretrained=True)  # Load pretrained VGG16 model
             self.model.classifier[6] = nn.Linear(4096, num_classes)  # Replace final layer for `num_classes`
@@ -124,6 +124,10 @@ class PretrainedEyeDiseaseClassifier(nn.Module, CustomModelMethods):
             self.model = models.resnet18(pretrained=True)  # Load pretrained ResNet18 model
             num_ftrs = self.model.fc.in_features  # Get the number of input features for the final layer
             self.model.fc = nn.Linear(num_ftrs, num_classes)  # Replace final layer with a custom one
+        elif pretrained_model == 'efficientnet-b7':
+            self.model = EfficientNet.from_pretrained('efficientnet-b7')  # Load pretrained EfficientNet-B7 model
+            num_ftrs = self.model._fc.in_features  # Get the number of input features for the final layer
+            self.model._fc = nn.Linear(num_ftrs, num_classes)  # Replace final layer with a custom one
         else:
             raise ValueError("Unsupported pretrained model. Choose 'vgg16' or 'resnet18'.")
 

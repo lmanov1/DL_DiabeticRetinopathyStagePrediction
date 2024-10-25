@@ -1,5 +1,6 @@
 import os
 import sys
+import re
 from datetime import datetime
 
 def save_terminal_output_to_file(output_dir="logs", filename_prefix="terminal_out", mode="w"):
