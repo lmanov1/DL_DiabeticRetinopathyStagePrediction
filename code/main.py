@@ -183,7 +183,10 @@ def train_inference_model(inf_model, dls, criterion, quick_debug, patience=5, ma
 
 # Function to save trained model
 def save_trained_model(inf_model, dataset_name):
-    trained_model_file_name = dataset_name + '_trained_model.pth'
+
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M')
+    trained_model_file_name = f"{dataset_name}{timestamp}_trained_model.pth"
+    # trained_model_file_name = dataset_name + '_trained_model.pth'
     trained_weights_path = os.path.join(os.getcwd(), 'data', 'output', trained_model_file_name).replace('/',
                                                                                                         get_path_separator())
     print(" ===> Saving trained model to ", trained_weights_path)
