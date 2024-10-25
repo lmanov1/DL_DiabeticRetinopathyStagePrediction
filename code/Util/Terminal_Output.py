@@ -1,9 +1,8 @@
-import sys
 import os
+import sys
 from datetime import datetime
 
-
-def save_terminal_output_to_file(output_dir="logs", filename_prefix="output", mode="a"):
+def save_terminal_output_to_file(output_dir="logs", filename_prefix="output", mode="w"):
     """
     Redirects terminal output to a file with a timestamp.
 
@@ -12,6 +11,7 @@ def save_terminal_output_to_file(output_dir="logs", filename_prefix="output", mo
         filename_prefix (str): The prefix for the output filename.
         mode (str): The file mode ('a' for append or 'w' for overwrite).
     """
+    # Ensure the output directory exists
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
@@ -22,12 +22,13 @@ def save_terminal_output_to_file(output_dir="logs", filename_prefix="output", mo
     filename = f"{filename_prefix}_{timestamp}.txt"
     file_path = os.path.join(output_dir, filename)
 
-    # Open the file and redirect the output
-    sys.stdout = open(file_path, mode)
-    sys.stderr = open(file_path, mode)  # Redirect stderr as well, if needed
-    print(f"Saving terminal output to file: {file_path}")
+    # Try opening the file and redirecting output
+    try:
+        sys.stdout = open(file_path, mode)
+        sys.stderr = open(file_path, mode)  # Redirect stderr as well
+        print(f"Saving terminal output to file: {file_path}")
+    except Exception as e:
+        print(f"Error redirecting output: {e}")
 
-# Call this function at the start of the script where you want to capture output
-# For example:
-#
-
+# Example usage
+# save_terminal_output_to_file()

@@ -155,7 +155,10 @@ class EyeDiseaseClassifier(nn.Module, CustomModelMethods):
 
         # Define fully connected layers
         self.fc1 = nn.Linear(128 * 28 * 28, 512)  # First fully connected layer
-        self.fc2 = nn.Linear(512, num_classes)  # Final output layer, number of outputs equals `num_classes`
+        self.fc2 = nn.Linear(512, num_classes)  # Final output layer, number of outputs equals num_classes
+
+        # Add Dropout layer
+        self.dropout = nn.Dropout(p=0.5)  # 50% Dropout
 
     def forward(self, x):
         """Forward pass for the custom CNN architecture."""
@@ -167,12 +170,14 @@ class EyeDiseaseClassifier(nn.Module, CustomModelMethods):
         x = F.max_pool2d(x, kernel_size=2, stride=2)  # Third pooling layer
         x = x.view(x.size(0), -1)  # Flatten before feeding into fully connected layers
         x = F.relu(self.fc1(x))  # Apply ReLU after first fully connected layer
+        x = self.dropout(x)  # Apply Dropout after fully connected layer
         x = self.fc2(x)  # Output layer
         return x
 
     def set_num_classes(self, num_classes):
         """Set the final layer dynamically to support different numbers of output classes."""
-        self.fc2 = nn.Linear(512, num_classes)  # Adjust final output layer to match `num_classes`
+        self.fc2 = nn.Linear(512, num_classes)  # Adjust final output layer to match num_classes
+
 
 # --- Usage Notes ---
 # 1. Instantiate either `PretrainedEyeDiseaseClassifier` or `EyeDiseaseClassifier` based on model needs.

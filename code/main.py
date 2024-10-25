@@ -1,12 +1,5 @@
-# Windows -environment issues by folder name code which has main.py in it
-
 import sys
 import os
-# This should be the first code that runs
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-# Now you can safely import your modules from the 'code' directory
-# from code import your_module  # This should now work as expected
-
 import torch
 import torch.nn as nn
 from code.models.callbacks.early_stopping import EarlyStopping
@@ -131,36 +124,22 @@ def train_inference_model(inf_model, dls, criterion, quick_debug, patience=5, ma
     elif quick_debug:
         print("Quick debug mode enabled: Reducing epochs and data size for fast issue detection.")
         # Reduce data size by sampling small batches from training/validation sets
-        dls.train = dls.train.new(shuffle=True, bs=4)  # Small batch size for quick iterations
+        dls.train = dls.train.new(shuffle=True, bs=4)  # Small batch size for quick iterations 4 instead of 2
         dls.valid = dls.valid.new(bs=4)
         max_epochs = 1  # Only 1 epoch for quick debugging
     elif not quick_debug:
         max_epochs = 100  # Normal training configuration
         print("Full training mode enabled.")
 
-
     # Adjust learning rate
     inf_learner = inf_model.get_learner(dls, criterion, accuracy)
-
-    # Find the best learning rate
-    inf_learner.lr_find()  # method will help you visualize how the learning rate affects the loss function.
-
-    # Get the recommended learning rate
-    # The suggested learning rate is typically the one found in the plot where the loss starts to decrease significantly.
-    best_lr = inf_learner.recorder.lr_min  # This gives you the learning rate corresponding to the minimum loss
-
 
     # Apply Early Stopping
     early_stopping = EarlyStopping(patience=patience)
 
     # Apply Dropout and L2 Regularization to prevent overfitting
-    inf_model.model = nn.Sequential(
-        inf_model.model,
-        nn.Dropout(p=0.5),  # 50% dropout rate
-        nn.Linear(inf_model.model[-1].out_features, inf_model.num_classes),
-        nn.Softmax(dim=1)
-    )
-    inf_model.optimizer = torch.optim.Adam(inf_model.parameters(), weight_decay=1e-4)  # L2 regularization
+    # Set up the optimizer with L2 regularization (weight_decay)
+    #inf_model.optimizer = torch.optim.Adam(inf_model.parameters(), weight_decay=1e-4)  # L2 regularization
 
     print(f"Training dataset size: {len(dls.train_ds)}")
     print(f"Validation dataset size: {len(dls.valid_ds)}")
@@ -184,7 +163,7 @@ def train_inference_model(inf_model, dls, criterion, quick_debug, patience=5, ma
         print(f"Starting epoch {epoch}...")
 
         # Train the model for one epoch
-        inf_learner.fit_one_cycle(1, lr_max=best_lr)  # Train for one epoch
+        inf_learner.fit_one_cycle(1)  # Train for one epoch
 
         # Monitor validation loss for early stopping
         val_loss = inf_learner.validate()[0]  # Get the validation loss
@@ -220,11 +199,6 @@ def collect_patient_data():
     print("Collecting patient data...")
     return patient_data
 
-
-# Placeholder for logic to adjust training parameters
-# def adjust_training_parameters():
-#    print("Adjusting training parameters...")
-#    return {"epochs": 10, "learning_rate": 0.001}
 
 
 def main():
@@ -270,17 +244,17 @@ def main():
             configurations = [
                 (4, 1),  # Case 1
                 (8, 1),  # Case 2
-                (16, 1),  # Case 3
-                (16, 50),  # Case 4
-                (8, 50),  # Case 5
-                (4, 50)  # Case 6
+                # (16, 1),  # Case 3
+                # (16, 50),  # Case 4
+                # (8, 50),  # Case 5
+                # (4, 50)  # Case 6
             ]
 
             # Iterate through each configuration
             for bs, max_epoch in configurations:
                 print(f"\nRunning training and Validation with Batch Size: {bs} and Max Epoch: {max_epoch}")
 
-                # Update the DataLoader with the current batch size
+                # # Update the DataLoader with the current batch size
                 dls.train.bs = bs
                 dls.valid.bs = bs  # Assuming you want to keep the validation batch size the same
 
