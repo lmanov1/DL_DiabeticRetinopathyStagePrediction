@@ -188,7 +188,7 @@ def save_trained_model(inf_model, dataset_name):
                                                                                                         get_path_separator())
     print(" ===> Saving trained model to ", trained_weights_path)
     torch.save(inf_model.state_dict(), trained_weights_path)
-    print(" ===> Saving terminal output to ", trained_weights_path)
+
     terminal_out(trained_weights_path)
     return trained_weights_path
 

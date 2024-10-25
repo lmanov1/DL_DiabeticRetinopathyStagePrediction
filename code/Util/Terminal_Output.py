@@ -2,7 +2,7 @@ import os
 import sys
 from datetime import datetime
 
-def save_terminal_output_to_file(output_dir="logs", filename_prefix="output", mode="w"):
+def save_terminal_output_to_file(output_dir="logs", filename_prefix="terminal_out", mode="w"):
     """
     Redirects terminal output to a file with a timestamp.
 
@@ -11,16 +11,20 @@ def save_terminal_output_to_file(output_dir="logs", filename_prefix="output", mo
         filename_prefix (str): The prefix for the output filename.
         mode (str): The file mode ('a' for append or 'w' for overwrite).
     """
+
+    new_output_dir = re.sub(r'\\[^\\]+\\$', '\\', output_dir)
+
+    print(" ===> Saving terminal output to Directory: ", new_output_dir)
     # Ensure the output directory exists
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
+    if not os.path.exists(new_output_dir):
+        os.makedirs(new_output_dir)
 
     # Create a timestamp for the filename
     timestamp = datetime.now().strftime('%Y%m%d_%H%M')
 
     # Construct the file path
     filename = f"{filename_prefix}_{timestamp}.txt"
-    file_path = os.path.join(output_dir, filename)
+    file_path = os.path.join(new_output_dir, filename)
 
     # Try opening the file and redirecting output
     try:
@@ -32,3 +36,7 @@ def save_terminal_output_to_file(output_dir="logs", filename_prefix="output", mo
 
 # Example usage
 # save_terminal_output_to_file()
+
+
+
+
