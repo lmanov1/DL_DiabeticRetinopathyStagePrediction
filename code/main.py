@@ -9,7 +9,9 @@ from code.data import Dataloader as KaggleDataLoader
 from fastai.vision.all import *
 from Util.MultiPlatform import *
 from Util.Terminal_Output import save_terminal_output_to_file as terminal_out
+from Util.Terminal_Output import pre_save_actions, post_save_actions
 from sklearn.model_selection import GridSearchCV  # Import GridSearchCV
+from Util.cleanup_resources import clean_up_resources
 import time
 
 # Define the dataset names and paths
@@ -85,10 +87,10 @@ def train_pretrained_model(pretrained_model, dls, pretrained_weights_path):
 
         torch.save(pretrained_model.state_dict(), pretrained_weights_path)
         print(" ===>  Saving pretrained model to ", pretrained_weights_path)
-        terminal_out(pretrained_weights_path)
         print(" ===>  Pretrained model training completed.")
         print(" ===>  Evaluating pretrained model...")
         pretrained_model.evaluate_model(dls)
+        terminal_out(pretrained_weights_path)
     else:
         print(" ===>  Pretrained model already exists at ", pretrained_weights_path)
 
@@ -185,7 +187,7 @@ def train_inference_model(inf_model, dls, criterion, quick_debug, patience=5, ma
 def save_trained_model(inf_model, dataset_name):
 
     timestamp = datetime.now().strftime('%Y%m%d_%H%M')
-    trained_model_file_name = f"{dataset_name}{timestamp}_trained_model.pth"
+    trained_model_file_name = f"{dataset_name}{timestamp}_infer_trained_model.pth"
     # trained_model_file_name = dataset_name + '_trained_model.pth'
     trained_weights_path = os.path.join(os.getcwd(), 'data', 'output', trained_model_file_name).replace('/',
                                                                                                         get_path_separator())
@@ -206,6 +208,8 @@ def collect_patient_data():
 
 def main():
     train_dataloaders = {}
+
+    original_stdout, original_stderr = pre_save_actions()
     print("Starting the main function...")
 
     # Collect patient data age, sex, systolic blood pressure (SBP), smoking, urinary protein, and HbA1c level as positively associated with the risk
@@ -231,7 +235,7 @@ def main():
 
     for key, dls in train_dataloaders.items():
         dataset_name = os.path.basename(key).split('.')[0]
-        skip_pretrained = True  # Ensure that pretrained model is used
+        skip_pretrained = False  # Ensure that pretrained model is used
 
         if not skip_pretrained:
             # Create a timestamp for the filename
@@ -249,10 +253,10 @@ def main():
             configurations = [
                 (4, 1),  # Case 1
                 (8, 1),  # Case 2
-                # (16, 1),  # Case 3
-                # (16, 50),  # Case 4
-                # (8, 50),  # Case 5
-                # (4, 50)  # Case 6
+                (16, 1),  # Case 3
+                (16, 50),  # Case 4
+                (8, 50),  # Case 5
+                (4, 50)  # Case 6
             ]
 
             # Iterate through each configuration
@@ -284,6 +288,9 @@ def main():
 
                 # Print additional information after evaluation
                 print("Model evaluation complete for dataset:", dataset_name)
+                clean_up_resources()  # after long run several iteration Pycharm crash.
+
+    post_save_actions(original_stdout, original_stderr)
 
 
 # Call the main function
