@@ -22,7 +22,7 @@ pip 24.2
 5. Run `poetry shell`
 
 6.  About Kaggle API  
-    We use Kaggle API to download datasets from Kaggle.           
+    We use Kaggle API to download ALL_DATASETS from Kaggle.           
     To use the Kaggle API, sign up for a Kaggle account at https://www.kaggle.com     
     Then go to the 'Account' tab of your user profile (https://www.kaggle.com/<username>/account) and select 'Create API Token'. This will trigger the download of kaggle.json, a file containing your API credentials. Place this file in the location appropriate for your operating system:
 
@@ -52,8 +52,8 @@ pip 24.2
     Existing code should support both CPU/GPU environments, Windows, Linux, and (maybe 🙂) MAC
 ### Data Handling
 #### Data Acquisition:
-    Download datasets from Kaggle: 2015 Diabetic Retinopathy Detection, APTOS 2019 Blindness Detection.
-    Organize the datasets in a structured format.
+    Download ALL_DATASETS from Kaggle: 2015 Diabetic Retinopathy Detection, APTOS 2019 Blindness Detection.
+    Organize the ALL_DATASETS in a structured format.
 #### Data Preprocessing:
     Clean and normalize images.
     Implement data augmentation techniques.
@@ -132,7 +132,7 @@ train_model.py
 Is a base class that defines methods for training and evaluating a model, using a learner object
 Methods:
 - train_model - for fine-tuning models with pretrained weigth , using an internal learner object
-- evaluate_model - using internal learner object , loss function of CrossEntropyLossFlat and accuracy metrics.
+- evaluate_model - using internal learner object , loss function of CrossEntropyLoss and accuracy metrics.
 - get_learner(evaluation metrcis) - get an internal learner object
 ##### Class: PretrainedEyeDiseaseClassifier
 
@@ -148,7 +148,7 @@ Methods:
 ##### Class: EyeDiseaseClassifier    
 
 This is a generic CNN classification model that can be used for different eye disease diagnostics ( based on retina fundus images).This flexibility is due to the configurable number of classes for model use (num_classes = 5 (0..4) in case of Diabetic Retinopathy classification).  
-The model can be trained on different datasets, each with its relevant disease-related labels (based on ‘num classes’ parameter which defines the last decision layer shape).     
+The model can be trained on different ALL_DATASETS, each with its relevant disease-related labels (based on ‘num classes’ parameter which defines the last decision layer shape).     
 The class uses Fastai data loaders that allow dataset iteration on (label, image) batches.
 Inherits parent classes torch.nn.Module and CustomModelMethods.
 Methods
@@ -158,9 +158,9 @@ Methods
 
 #### Main flow      
 Main Function: main()            
-- Downloads the datasets. Currently works with        
+- Downloads the ALL_DATASETS. Currently works with        
     `benjaminwarner/resized-2015-2019-blindness-detection-images`         
-    See `Define the dataset names and paths` section in code/main.py for more details , there are more available datasets available in Kaggle that we can use.
+    See `Define the dataset names and paths` section in code/main.py for more details , there are more available ALL_DATASETS available in Kaggle that we can use.
 - Prepares the DataLoaders      
 - Trains and evaluates both pre-trained and inference models, saves models under data/output as *.pth (torch model format). These files kept local as it can be too big to be uploaded to github.         
 - On subsequent run , once pretrained model (previously fine tuned on specific dataset) is found  under the `data/output/datasetname_pretrained.pth`, it will not be run again.    
@@ -184,5 +184,5 @@ poetry export -f requirements.txt --output requirements.txt
 app.py  - main gradio application script.
 Leverages existing        
 update_production.py - upload relevant files from git to production space (`https://huggingface.co/spaces/Lmanov1/timm-efficientnet_b3.ra2_in1k`)           
-For inference models persistant storage - we use a dataset repo (`https://huggingface.co/datasets/Lmanov1/BUI17_data`) 
+For inference models persistant storage - we use a dataset repo (`https://huggingface.co/ALL_DATASETS/Lmanov1/BUI17_data`) 
 To run  `update_production.py` there is a need to login to Hagging face with  a valid Hugging face API TOKEN. Currently token value being read from .env file where it should be stored in format:  MY_TOKEN="PUT HERE YOUR KEY".  This file is not managed by git , but local in the root directory of the project.

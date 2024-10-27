@@ -15,8 +15,9 @@ from code.Util.MultiPlatform import *
 # Get DataLoaders: Provides the DataLoaders for training and validation.
 # Show Batch: Displays a batch of images with labels for quick visualization.
 class DataPreparation:
-    def __init__(self, csv_path, img_folder, imaging_format = 'jpg',
+    def __init__(self, csv_path, img_folder, imaging_format = 'jpg', transform_size = 224, with_splitter=False,
                    valid_pct=0.2, batch_size=32, seed=42):
+        print(f"DataPreparation: csv_path {csv_path} img_folder {img_folder} imaging_format {imaging_format} valid_pct {valid_pct} batch_size {batch_size} seed {seed}")
         self.csv_path = csv_path
         self.img_folder = img_folder + get_path_separator()
         self.valid_pct = valid_pct
@@ -24,6 +25,8 @@ class DataPreparation:
         self.imaging_format = imaging_format
         self.seed = seed
         self.dls = None
+        self.use_splitter = with_splitter
+        self.transform_size = transform_size
 
     def load_data(self):
         """
@@ -39,24 +42,28 @@ class DataPreparation:
         print(" df columns: ", df.columns)
         print(f"info: {df.info()}")
         #print(f"head: {df.head()}")
-        #print(f"value counts: {df.value_counts()}")
+        if self.use_splitter == True:
+            random_splitter=RandomSplitter(valid_pct=self.valid_pct, seed=self.seed) 
+        else:
+            random_splitter=None
+        print(f"random_splitter: {random_splitter} self.splitter {self.use_splitter}")
 
         try:
             dblock = DataBlock(
             blocks=(ImageBlock, CategoryBlock),
             get_x=ColReader(df.columns[0], pref=self.img_folder),
-            get_y=ColReader(df.columns[1]),
-            #splitter=RandomSplitter(valid_pct=self.valid_pct, seed=self.seed), #Instead of using RandomSplitter, the training dataset is directly used without splitting
+            get_y=ColReader(df.columns[1]),            
+            splitter = random_splitter, 
             item_tfms=Resize(460),
-            batch_tfms=aug_transforms(size=224, min_scale=0.75)
+            batch_tfms=aug_transforms(size=self.transform_size, min_scale=0.75)
             )
         except FileNotFoundError:
             print(f"File not found. Skipping to the next file.")
             pass
 
         print(f"DataBlock created  {dblock}")
-        self.dls = dblock.dataloaders(df, bs=self.batch_size)
-        print(f"data loaders : {self.dls}")
+        self.dls = dblock.dataloaders(df, bs=self.batch_size, with_labels=True)
+        print(f"Data loaders created: {self.dls}")
 
     def normalize_data(self):
         """
