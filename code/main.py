@@ -22,8 +22,8 @@ DATASET_PATH = 'data/raw/'
 # Define the dataset structure
 dataset_train_structure_resized15_19 = [
     {
-        'labels': 'labels/trainLabels19.csv',
-        'images': 'resized train 19'
+        'labels': 'labels/trainLabels15.csv',
+        'images': 'resized train 15'
     }
 ]
 
@@ -84,9 +84,11 @@ def train_pretrained_model(pretrained_model, dls, pretrained_weights_path):
         pretrained_model.train_model(dls, epochs=10)
         end_time = time.time()
         print_time(start_time, end_time, "Pretrained model training time")
+        pretrained_model.save_model(pretrained_weights_path, 'full')
+        pretrained_model.save_model(pretrained_weights_path, 'weights')
 
-        torch.save(pretrained_model.state_dict(), pretrained_weights_path)
-        print(" ===>  Saving pretrained model to ", pretrained_weights_path)
+        #torch.save(pretrained_model.state_dict(), pretrained_weights_path)  # save only the weights without the architecture
+        print(" ===>  Saving .pth and .pt  pretrained model to ", pretrained_weights_path)
         print(" ===>  Pretrained model training completed.")
         print(" ===>  Evaluating pretrained model...")
         pretrained_model.evaluate_model(dls)
@@ -207,6 +209,7 @@ def collect_patient_data():
 
 
 def main():
+    # https: // huggingface.co / docs / transformers / model_sharing
     train_dataloaders = {}
 
     original_stdout, original_stderr = pre_save_actions()
@@ -225,9 +228,21 @@ def main():
     device = check_cuda_availability()
 
     num_dr_classes = 5  # 0 - No DR, 1 - Mild, 2 - Moderate, 3 - Severe, 4 - Proliferative DR
+
     # pretrained_models[2] is  EfficientNet-B7  . [0] is the VGG16
     pretrained_model = PretrainedEyeDiseaseClassifier(num_classes=num_dr_classes, pretrained_model=pretrained_models[2])
-    criterion = nn.CrossEntropyLoss()
+
+    # Skewness
+    #Later on set as a function - Hard coded from the excel train 2015 Let's say these are the sample counts for each class
+    class_counts = [25810, 2443, 5292, 873, 708]  # Replace with your actual class distribution
+
+    # Compute weights inversely proportional to class frequency
+    class_weights = [1.0 / count for count in class_counts]
+    class_weights = torch.tensor(class_weights, dtype=torch.float32)
+
+    # Initialize CrossEntropyLoss with class weights
+    criterion = nn.CrossEntropyLoss(weight=class_weights)
+
 
     inf_model = EyeDiseaseClassifier(num_classes=num_dr_classes)
     inf_model.to(device)

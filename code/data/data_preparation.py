@@ -2,7 +2,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from fastai.vision.all import *
-from Util.MultiPlatform import *
+from code.Util.MultiPlatform import *
 
 # This class is used to load previously downloaded data from a CSV file (for labels) and a correstponding 
 # folder (for images)

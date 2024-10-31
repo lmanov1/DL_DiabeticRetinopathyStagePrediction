@@ -1,54 +1,41 @@
 # Importing necessary libraries for model training, evaluation, and transfer learning
-from fastai.vision.all import *  # useful for building and training vision models and quick Learner setup
+from fastai.vision.all import *  # Useful for building and training vision models and quick Learner setup
 import torch  # PyTorch, the core framework for defining models and tensors, building neural networks
 import torch.nn as nn  # Neural network layers from PyTorch
 import torchvision.models as models  # Contains pre-built, pretrained models like ResNet and VGG.
-from sklearn.metrics import accuracy_score, classification_report, \
-    confusion_matrix  # Used for calculating accuracy, generating classification reports, and plotting confusion matrices.
-import torch.nn.functional as F  # Functional layers, like activation functions  and utilities for the forward pass.
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix,precision_score, recall_score, f1_score # Used for calculating accuracy, generating classification reports, and plotting confusion matrices.
+import torch.nn.functional as F  # Functional layers, like activation functions and utilities for the forward pass.
 from efficientnet_pytorch import EfficientNet
-
-# --- Overall Structure ---
-# The file defines three main classes:
-# 1. `CustomModelMethods`: Base class providing methods for training, evaluating, and managing models using FastAI Learner.
-# 2. `PretrainedEyeDiseaseClassifier`: A transfer learning model using either `vgg16` or `resnet18` for classifying eye diseases.
-# 3. `EyeDiseaseClassifier`: A custom Convolutional Neural Network (CNN) architecture for eye disease classification.
-
-# ---- Early Stopping (Optional) ---
-# Early stopping can be introduced in the training process to prevent overfitting.
-# Example: Add `callbacks=[EarlyStoppingCallback(monitor='accuracy', patience=3)]` in the `Learner` object within `train_model`.
+from transformers import AutoModel  # Import for Hugging Face model saving
 
 class CustomModelMethods:
-    """CustomModelMethods is a base class that defines methods for training and evaluating a model using FastAI"""
+    """CustomModelMethods is a base class that defines methods for training and evaluating a model using FastAI."""
 
     def __init__(self):
         # Initialize without any learner
         self.class_learner = None
 
     def get_learner(self, dls, criterion, metrics):
-        """get_learner initializes a FastAI Learner with a given dataset, criterion, and metrics."""
+        """Initializes a FastAI Learner with a given dataset, criterion, and metrics."""
         if self.class_learner is None:  # If learner doesn't exist, create one
             self.class_learner = Learner(dls, self, loss_func=criterion, metrics=metrics)
         return self.class_learner  # Return the initialized learner
 
-
     def train_model(self, dls, epochs=10):
-        """train_model uses FastAI Learner's fine_tune method for transfer learning or training from scratch."""
+        """Trains the model using FastAI Learner's fine_tune method for transfer learning or training from scratch."""
         if self.class_learner is None:  # Create learner if not already initialized
             self.class_learner = Learner(dls, self, loss_func=CrossEntropyLossFlat(), metrics=accuracy)
         self.class_learner.fine_tune(epochs)  # Perform fine-tuning over `epochs` epochs
 
     def evaluate_model(self, dls):
-        """Evaluate the model: generates confusion matrix, displays top losses, and calculates accuracy."""
-
-        # Ensure we are using the validation DataLoader
+        """Evaluates the model: generates confusion matrix, displays top losses, and calculates accuracy."""
         print("Using validation DataLoader for evaluation.")
         print(f"Validation DataLoader size: {len(dls.valid)}")
 
         if self.class_learner is None:
             self.class_learner = Learner(dls.valid, self, loss_func=CrossEntropyLossFlat(), metrics=accuracy)
 
-        # Check the dataset sizes during evaluation
+        # Check dataset sizes during evaluation
         print(f"Validation dataset size: {len(dls.valid_ds)}")
         print(f"Training dataset size: {len(dls.train_ds)}")
 
@@ -56,15 +43,15 @@ class CustomModelMethods:
         print(f"Training DataLoader size: {len(dls.train)}")
         print(f"Validation DataLoader size: {len(dls.valid)}")
 
-        # Check the structure of the validation dataset
+        # Validate structure of the validation dataset
         print("Validating the structure of the validation dataset...")
-        print(f"Sample validation data (first 5 items): {dls.valid_ds.items[:5]}")  # Print the first 5 items
+        print(f"Sample validation data (first 5 items): {dls.valid_ds.items[:5]}")  # Print first 5 items
 
         # Correctly access the validation labels
         labels = [item[1] for item in dls.valid_ds.items]  # Assuming the second element is the label
-        print(f"Sample validation labels (first 5): {labels[:5]}")  # Print the first 5 labels
+        print(f"Sample validation labels (first 5): {labels[:5]}")  # Print first 5 labels
 
-        # ClassificationInterpretation helps generate metrics like confusion matrix and top losses
+        # Generate metrics like confusion matrix and top losses
         interp = ClassificationInterpretation.from_learner(self.class_learner)
 
         # Get predictions and targets
@@ -102,46 +89,120 @@ class CustomModelMethods:
             print('Confusion Matrix:')
             print(confusion_matrix(targets, preds))
 
+            # Micro and Macro metrics
+            micro_precision = precision_score(targets, preds, average='micro')
+            micro_recall = recall_score(targets, preds, average='micro')
+            micro_f1 = f1_score(targets, preds, average='micro')
+
+            macro_precision = precision_score(targets, preds, average='macro')
+            macro_recall = recall_score(targets, preds, average='macro')
+            macro_f1 = f1_score(targets, preds, average='macro')
+
+            print("\nMicro and Macro Averages:")
+            print(f"Micro Precision: {micro_precision:.4f}")
+            print(f"Micro Recall: {micro_recall:.4f}")
+            print(f"Micro F1 Score: {micro_f1:.4f}")
+            print(f"Macro Precision: {macro_precision:.4f}")
+            print(f"Macro Recall: {macro_recall:.4f}")
+            print(f"Macro F1 Score: {macro_f1:.4f}")
+
+
+
+
+    def save_model(self, filename, mode='weights', pretrained_pkl_path=None):
+        """Saves the model weights to the specified file or directory using Hugging Face's save_pretrained method."""
+        if mode == 'weights':
+            if hasattr(self.class_learner.model, 'save_pretrained'):
+                self.class_learner.model.save_pretrained(filename)  # Use Hugging Face method
+                print(f"Model weights saved to {filename}.")
+            else:
+                torch.save(self.class_learner.model.state_dict(), filename)  # Fallback for non-Hugging Face models
+                print(f"Model weights saved to {filename}.")
+        elif mode == 'full':
+            torch.save(self.class_learner, filename)
+            print(f"Full model saved to {filename}.")
+        else:
+            raise ValueError("Invalid mode. Use 'full' or 'weights'.")
+
+        # Export to pickle file from the learner
+        if pretrained_pkl_path is not None:
+            self.class_learner.export(pretrained_pkl_path)
+            print(f"Learner exported to {pretrained_pkl_path}.")
+
+    def load_model(self, filename, mode='full'):
+        """Loads the model weights or the full model from the specified file."""
+        try:
+            if filename.endswith('.pth') or filename.endswith('.pt'):
+                if mode == 'weights':
+                    self.class_learner.model.load_state_dict(torch.load(filename))
+                    print(f"Model weights loaded from {filename}.")
+                elif mode == 'full':
+                    self.class_learner = torch.load(filename)  # Load the entire model
+                    print(f"Full model loaded from {filename}.")
+                else:
+                    raise ValueError("Invalid mode. Use 'full' or 'weights'.")
+            elif filename.endswith('.pkl'):
+                self.class_learner = torch.load(filename)  # Load the entire learner from the pickle file
+                print(f"Full model loaded from {filename}.")
+            else:
+                raise ValueError("Unsupported file extension. Use .pth, .pt, or .pkl.")
+
+        except Exception as e:
+            if mode == 'weights':
+                self.class_learner.model.load_state_dict(torch.load(filename, strict=False))
+                print(f"Model weights loaded with strict=False from {filename}. Warning: {e}")
+            elif mode == 'full':
+                self.class_learner = torch.load(filename, strict=False)
+                print(f"Full model loaded with strict=False from {filename}. Warning: {e}")
+            else:
+                print(f"An error occurred: {e}. Invalid mode. Use 'full' or 'weights'.")
+
 
 # List of pretrained models we can choose from for transfer learning
 pretrained_models = ['vgg16', 'resnet18', 'efficientnet-b7']
 
 
-# PretrainedEyeDiseaseClassifier allows the use of pretrained models (VGG16 or ResNet18) for eye disease classification
 class PretrainedEyeDiseaseClassifier(nn.Module, CustomModelMethods):
-    """A pretrained model for classifying eye diseases using transfer learning. Supports VGG16 or ResNet18."""
+    """A pretrained model for classifying eye diseases using transfer learning. Supports VGG16, ResNet18, or EfficientNet-B7."""
 
     def __init__(self, num_classes=5, pretrained_model='vgg16'):
         nn.Module.__init__(self)  # Initialize PyTorch's nn.Module
-        CustomModelMethods.__init__(
-            self)  # Initialize methods for training/evaluation from the CustomModelMethods class
+        CustomModelMethods.__init__(self)  # Initialize methods for training/evaluation from the CustomModelMethods class
 
-        # Choose between VGG16 or ResNet18 or efficientnet-b7 pretrained models
+        # Initialize num_ftrs as an instance variable
+        self.num_ftrs = None
+
+        # Choose between VGG16, ResNet18, or EfficientNet-B7 pretrained models
         if pretrained_model == 'vgg16':
             self.model = models.vgg16(pretrained=True)  # Load pretrained VGG16 model
             self.model.classifier[6] = nn.Linear(4096, num_classes)  # Replace final layer for `num_classes`
+            self.num_ftrs = 4096  # Set num_ftrs for VGG16
         elif pretrained_model == 'resnet18':
             self.model = models.resnet18(pretrained=True)  # Load pretrained ResNet18 model
-            num_ftrs = self.model.fc.in_features  # Get the number of input features for the final layer
-            self.model.fc = nn.Linear(num_ftrs, num_classes)  # Replace final layer with a custom one
+            self.num_ftrs = self.model.fc.in_features  # Get the number of input features for the final layer
+            self.model.fc = nn.Linear(self.num_ftrs, num_classes)  # Replace final layer with a custom one
         elif pretrained_model == 'efficientnet-b7':
             self.model = EfficientNet.from_pretrained('efficientnet-b7')  # Load pretrained EfficientNet-B7 model
-            num_ftrs = self.model._fc.in_features  # Get the number of input features for the final layer
-            self.model._fc = nn.Linear(num_ftrs, num_classes)  # Replace final layer with a custom one
+            self.num_ftrs = self.model._fc.in_features  # Get the number of input features for the final layer
+            self.model._fc = nn.Linear(self.num_ftrs, num_classes)  # Replace final layer with a custom one
         else:
-            raise ValueError("Unsupported pretrained model. Choose 'vgg16' or 'resnet18'.")
+            raise ValueError("Unsupported pretrained model. Choose 'vgg16', 'resnet18', or 'efficientnet-b7'.")
 
     def forward(self, x):
-        """Forward pass for the model, which simply passes input through the selected pretrained model."""
-        return self.model(x)
+        """Forward pass for the model, which applies the pretrained model's forward pass."""
+        x = self.model(x)  # Pass input through the model
+        return x  # Return the output from the model
 
     def set_num_classes(self, num_classes):
         """Dynamically adjust the final layer to accommodate a new number of classes."""
         if isinstance(self.model, models.VGG):
-            self.model.classifier[6] = nn.Linear(4096, num_classes)  # Update VGG final layer
+            self.model.classifier[6] = nn.Linear(self.num_ftrs, num_classes)  # Update VGG final layer
         elif isinstance(self.model, models.ResNet):
-            num_ftrs = self.model.fc.in_features  # Get features for ResNet final layer
-            self.model.fc = nn.Linear(num_ftrs, num_classes)  # Update ResNet final layer
+            self.model.fc = nn.Linear(self.num_ftrs, num_classes)  # Update ResNet final layer
+        elif isinstance(self.model, EfficientNet):
+            self.model._fc = nn.Linear(self.num_ftrs, num_classes)  # Update EfficientNet final layer
+
+        print(f"Number of classes updated to {num_classes}.")  # Confirmation message
 
 
 # EyeDiseaseClassifier defines a custom CNN architecture for classifying eye diseases

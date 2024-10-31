@@ -1,7 +1,6 @@
 import os
 import platform
 
-
 def get_path_separator():
         return os.path.sep
         # system = platform.system()
