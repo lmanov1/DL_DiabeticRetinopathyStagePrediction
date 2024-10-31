@@ -7,9 +7,5 @@ __pycache__/
 .idea/
 code/data/raw/
 *.jpg
+*.png
 .gradio/
-class_probabilities.png contrast_enhanced_image.png
-denoised_image.png gamma_adjusted_image.png
-high_pass_filtered_image.png
-laplacian_sharpened_image.png
-sharpened_image.png
