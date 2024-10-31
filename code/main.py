@@ -259,7 +259,8 @@ def main():
             pretrained_weights_path = (os.path.join(os.getcwd(), 'data', 'output', pretrained_model_file_name).
                                        replace('/', get_path_separator()))
             print(" \n ===>  Looking for pretrained model here", pretrained_weights_path)
-            pretrained_model = train_pretrained_model(pretrained_model, dls, pretrained_weights_path)
+            pretrained_model = train_pretrained_model(pretrained_model, dls,
+                                                      )
         else:
             print("Skipping pretrained model training.")
 
