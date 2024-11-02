@@ -127,6 +127,8 @@ def main():
     Raises:
     ValueError: If the provided model file format is not supported.
     """
+    pretrained_model = None
+    pretrained_learn = None
     train_dataloaders = {}
     current_dataset = None
     Epochs = 2
@@ -142,17 +144,17 @@ def main():
         None,
     )
     testset_evaluation = testset_evaluation_if_exists
-    
+
     print(f"Using device: {device}")
     parser = argparse.ArgumentParser(description="Train or evaluate a model for diabetic retinopathy stage prediction.")
     parser.add_argument('--model_file', type=str, help='Path to the model file to load')
     parser.add_argument('--dataset', type=str, choices=DATASET_NAMES, default=DATASET_NAMES[1], help='Name of the dataset to use')
     parser.add_argument('--usetest', type=bool, choices=[False, True], default=False, help='Evaluate the model on the test dataset (the one specified with --dataset ) if available')
-    parser.add_argument('--torch_save_mode', type=str, choices=['weights', 'huggingface_weights' , 'full'], default='weights', help='Specify pretraining model loading mode derived from how it was saved. Relevant for torch only, default is weights only')    
+    parser.add_argument('--torch_save_mode', type=str, choices=['weights', 'huggingface_weights' , 'full'], default='weights', help='Specify pretraining model loading mode derived from how it was saved. Relevant for torch only, default is weights only')
     args = parser.parse_args()
 
     if args.dataset:
-        current_dataset = args.dataset    
+        current_dataset = args.dataset
     if args.usetest:
         testset_evaluation = args.usetest
     if args.model_file:
@@ -163,18 +165,18 @@ def main():
             if args.torch_save_mode:
                 torch_save_mode = args.torch_save_mode
             pretrained_model = load_model_from_pth(args.model_file, torch_save_mode)
-            
+
         else:
             raise ValueError("Unsupported model file format. Use .pkl or .pth")
         pretrained_learn = pretrained_model.get_learner()
         pretrained_learn.model.eval()
         print(f"Loaded model from {args.model_file}")
-    else:           
+    else:
         current_dataset = DATASET_NAMES[1]
-    
+
     # Download the dataset from Kaggle if needed
     dataset_dir = download_from_kaggle(current_dataset, DATASET_PATH)
-    print(f"Dataset directory: {dataset_dir}")                       
+    print(f"Dataset directory: {dataset_dir}")
 
     # Get the DataLoaders for the training and validation;  Test dataset will be created later if needed
     train_dataloaders = get_dataloaders(
@@ -195,59 +197,60 @@ def main():
                 dataset_dir,
                 ALL_DATASETS[current_dataset]["imaging_format"],
             )
-            val_key, val_dls = list(valid_dataloaders.items())[0]        
+            val_key, val_dls = list(valid_dataloaders.items())[0]
 
-        # Create model class and load pretrained weights or train the model
-        # Calculate weigths for loss function - this should address possible data imbalance issues with the dataset
-        # Yes our data , as turns out - is higthly imbalanced , with majority of cases labeled with severity 0 (No DR)
-        if handle_data_disbalance == True:
-            class_weights = calculate_class_weigths(train_dls)
-        else:
-            class_weights = None
+    # Create model class and load pretrained weights or train the model
+    # Calculate weigths for loss function - this should address possible data imbalance issues with the dataset
+    # Yes our data , as turns out - is higthly imbalanced , with majority of cases labeled with severity 0 (No DR)
+    if handle_data_disbalance == True:
+        class_weights = calculate_class_weigths(train_dls)
+    else:
+        class_weights = None
 
 
-        # Check if model file exists - train now if not found or load saved model if exists
-        need_to_train = True
-        need_to_train, pretrained_torch_path, pretrained_pkl_path , model_type = (
-            check_need_to_train_model(train_key, ALL_DATASETS[current_dataset]["name"], current_model_name)
-        )        
+    # Check if model file exists - train now if not found or load saved model if exists
+    need_to_train = True
+    need_to_train, pretrained_torch_path, pretrained_pkl_path , model_type = (
+        check_need_to_train_model(train_key, ALL_DATASETS[current_dataset]["name"], current_model_name)
+    )
 
-        if need_to_train:
-            pretrained_model = PretrainedEyeDiseaseClassifier(
-            num_classes=num_dr_classes,
-            model_name=current_model_name
-            ,label_weights=class_weights
-            )
-            pretrained_model.to(device)
-            start_time = time.time()
-            pretrained_model.train_model(train_dls, epochs=Epochs)
-            end_time = time.time()
-            print_time(start_time, end_time, "Elapsed fine-tuning time")
-            pretrained_learn = pretrained_model.get_learner()
-            # ==============================================================================
-            # Save the model (torch and pickle)            
-            best_model_state = deepcopy(
-                pretrained_model.get_learner().model.state_dict()
-            )  # don't save the pointer in memory but the entire object
-            torch.save(best_model_state, pretrained_torch_path)
-            
+    if need_to_train:
+        pretrained_model = PretrainedEyeDiseaseClassifier(
+        num_classes=num_dr_classes,
+        model_name=current_model_name
+        ,label_weights=class_weights
+        )
+        pretrained_model.to(device)
+        start_time = time.time()
+        pretrained_model.train_model(train_dls, epochs=Epochs)
+        end_time = time.time()
+        print_time(start_time, end_time, "Elapsed fine-tuning time")
+        pretrained_learn = pretrained_model.get_learner()
+        # ==============================================================================
+        # Save the model (torch and pickle)
+        best_model_state = deepcopy(
+            pretrained_model.get_learner().model.state_dict()
+        )  # don't save the pointer in memory but the entire object
+        torch.save(best_model_state, pretrained_torch_path)
 
-            print(" ===>  Saving pretrained model to ", pretrained_torch_path)
-            # Save the model weigths (in pkl format - unsecure but backward compatible in many cases)
-            print(" ===>  Exporting pretrained model to ", pretrained_pkl_path)
-            pretrained_learn.export(pretrained_pkl_path)
-        
-        else:  # Load the pretrained model            
-            if model_type == '.pkl':
-                print(f" ===>  Pretrained model already exists at {pretrained_pkl_path}") 
-                pretrained_model = load_model_from_pkl(pretrained_pkl_path)
-                                     
-            elif model_type == '.pth':
-                print(f" ===>  Pretrained model already exists at {pretrained_torch_path}") 
-                pretrained_model = load_model_from_pth(pretrained_torch_path)
-                           
-            pretrained_learn = pretrained_model.get_learner()        
-            pretrained_learn.model.eval() # Set dropout and batch normalization layers to evaluation mode before running inference
+
+        print(" ===>  Saving pretrained model to ", pretrained_torch_path)
+        # Save the model weigths (in pkl format - unsecure but backward compatible in many cases)
+        print(" ===>  Exporting pretrained model to ", pretrained_pkl_path)
+        pretrained_learn.export(pretrained_pkl_path)
+
+    else:  # Load the pretrained model
+        print(f" ===>  Loading pretrained model from  {pretrained_pkl_path}  {model_type}")
+        if model_type == 'pkl':
+            print(f" ===>  Pretrained model already exists at {pretrained_pkl_path}")
+            pretrained_model = load_model_from_pkl(pretrained_pkl_path)
+
+        elif model_type == 'pth':
+            print(f" ===>  Pretrained model already exists at {pretrained_torch_path}")
+            pretrained_model = load_model_from_pth(pretrained_torch_path)
+
+        pretrained_learn = pretrained_model.get_learner()
+        pretrained_learn.model.eval() # Set dropout and batch normalization layers to evaluation mode before running inference
 
     # ==============================================================================
     # Evaluate the model on the validation and test datasets
@@ -256,7 +259,7 @@ def main():
 
     elif val_dls is not None:
         evaluate_model_on(pretrained_learn, val_dls, pretrained_model , task_name='val')
-    
+
     # final evaluation on the test dataset if exists and configured to do so
     if testset_evaluation == True and ALL_DATASETS[current_dataset]["test"] is not None:
         test_dataloaders = get_dataloaders(
