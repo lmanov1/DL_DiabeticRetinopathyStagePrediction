@@ -167,4 +167,5 @@ data/output/*
 models/*.pth
 models/*.pkl
 models/*.keras
+extracted_model/*
 

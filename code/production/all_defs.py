@@ -11,13 +11,17 @@ MODEL_LOCAL_DIR = Path("../../data/output/")
 models_upload_to_dataset = [    
     "pretrained_trainLabels19_export.pth",
     "pretrained_trainLabels19_export.pkl",
-    "v1.0_vgg16_model.keras"
+    "v1.0_vgg16_model.keras",
+    #"vg4.0_model.pkl",
+    "vg4.0_trainLabels1920241026_2103_EfficientNetB7pretrained_model.pth"
     ]
 MODEL_DATASET_DIR = Path("models/")
 
 # Download the models from Google Drive
 models_download_from_drive = [
-    "v1.0_vgg16_model.keras"
+    "v1.0_vgg16_model.keras",
+    #"vg4.0_model.pkl",
+    "vg4.0_trainLabels1920241026_2103_EfficientNetB7pretrained_model.pth"
 ]
 
 DRIVE_MODELS_URL = "https://drive.google.com/file/d/1Y1XBp5m-AIc_eBGwQPcOjOJRiirPB9mA/view?usp=sharing"

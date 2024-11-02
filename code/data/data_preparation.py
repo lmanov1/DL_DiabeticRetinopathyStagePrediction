@@ -16,7 +16,7 @@ from code.Util.MultiPlatform import *
 # Show Batch: Displays a batch of images with labels for quick visualization.
 class DataPreparation:
     def __init__(self, csv_path, img_folder, imaging_format = 'jpg', transform_size = 224, with_splitter=False,
-                   valid_pct=0.2, batch_size=32, seed=42):
+                   valid_pct=0.1, batch_size=32, seed=42):
         print(f"DataPreparation: csv_path {csv_path} img_folder {img_folder} imaging_format {imaging_format} valid_pct {valid_pct} batch_size {batch_size} seed {seed}")
         self.csv_path = csv_path
         self.img_folder = img_folder + get_path_separator()
@@ -54,8 +54,10 @@ class DataPreparation:
             get_x=ColReader(df.columns[0], pref=self.img_folder),
             get_y=ColReader(df.columns[1]),            
             splitter = random_splitter, 
-            item_tfms=Resize(460),
-            batch_tfms=aug_transforms(size=self.transform_size, min_scale=0.75)
+           #item_tfms=Resize(460),
+            item_tfms=Resize(size=self.transform_size),
+            #batch_tfms=aug_transforms(size=self.transform_size, min_scale=0.75)
+            batch_tfms=aug_transforms(size=self.transform_size)
             )
         except FileNotFoundError:
             print(f"File not found. Skipping to the next file.")

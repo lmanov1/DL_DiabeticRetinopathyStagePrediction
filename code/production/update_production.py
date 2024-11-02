@@ -16,10 +16,13 @@ login(token=api_token)
 files_to_upload = [
     { "../../pyproject.toml": "./pyproject.toml"},
     {"../../requirements.txt": "./requirements.txt"},    
-    {"../models/train_model.py": "models/train_model.py"},
+    {"../models/train_model.py": "code/models/train_model.py"},
+    {"./__init__.py": "code/models/__init__.py"},
+    {"./__init__.py": "code/__init__.py"},
     {"./app.py": "./app.py"},
     {"./__init__.py": "./__init__.py"},
-    {"./all_defs.py": "./all_defs.py"}
+    {"./all_defs.py": "./all_defs.py"},
+    {"../config.py": "code/config.py"}
 ]
 
 # Upload the files to the repo
