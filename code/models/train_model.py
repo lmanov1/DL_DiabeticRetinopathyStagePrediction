@@ -294,24 +294,14 @@ class PretrainedEyeDiseaseClassifier(nn.Module , CustomModelMethods):
                 num_ftrs = self.model.fc.in_features
                 self.model.fc = nn.Linear(num_ftrs, num_classes)
             elif model_name == 'efficientnet-b7':
-                self.model = models.efficientnet_b7(weights= EfficientNet_B7_Weights.IMAGENET1K_V1)
-                #.from_pretrained('efficientnet-b7')  # Load pretrained EfficientNet-B7 model
-                #num_ftrs = self.model._fc.in_features  # Get the number of input features for the final layer
-                num_ftrs = self.model.classifier[1].in_features
-                #self.model._fc = nn.Linear(num_ftrs, num_classes)  # Replace final layer with a custom one
+                self.model = models.efficientnet_b7(weights= EfficientNet_B7_Weights.IMAGENET1K_V1)                
+                num_ftrs = self.model.classifier[1].in_features                
                 self.model.classifier[1] = nn.Linear(num_ftrs, num_classes)
             else:
                 raise ValueError(f"Unsupported model name: {model_name}")
 
     def forward(self, x):
         return self.model(x)
-
-    # def set_num_classes(self, num_classes):
-    #     if isinstance(self.model, models.VGG):
-    #         self.model.classifier[6] = nn.Linear(4096, num_classes)
-    #     elif isinstance(self.model, models.ResNet):
-    #         num_ftrs = self.model.fc.in_features
-    #         self.model.fc = nn.Linear(num_ftrs, num_classes)
 
 
 #================================================================================================
