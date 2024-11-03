@@ -10,7 +10,13 @@ package-mode = false
 
 
 #torchvision = "^0.19.1"
-# torchaudio = "^2.4.1"
+#torchaudio = "^2.4.1"
+#transformers = "^4.46.1"
+# keras to torch converters
+#onnx = "^1.17.0"
+#onnxmltools = "^1.12.0"
+#onnxconverter-common = "^1.14.0"
+#onnx2pytorch = "^0.5.0"
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.12"
@@ -28,13 +34,7 @@ torch = "*"
 gradio = "^5.1.0"
 environs = "^11.0.0"
 gdown = "^5.2.0"
-efficientnet-pytorch = "^0.7.1"
-transformers = "^4.46.1"
-onnx = "^1.17.0"
-onnxmltools = "^1.12.0"
-onnxconverter-common = "^1.14.0"
 numpy = "^1.24.0"
-onnx2pytorch = "^0.5.0"
 
 [build-system]
 requires = ["poetry-core"]

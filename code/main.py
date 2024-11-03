@@ -150,7 +150,8 @@ def main():
     parser.add_argument('--model_file', type=str, help='Path to the model file to load')
     parser.add_argument('--dataset', type=str, choices=DATASET_NAMES, default=DATASET_NAMES[1], help='Name of the dataset to use')
     parser.add_argument('--usetest', type=bool, choices=[False, True], default=False, help='Evaluate the model on the test dataset (the one specified with --dataset ) if available')
-    parser.add_argument('--torch_save_mode', type=str, choices=['weights', 'huggingface_weights' , 'full'], default='weights', help='Specify pretraining model loading mode derived from how it was saved. Relevant for torch only, default is weights only')
+    #parser.add_argument('--torch_save_mode', type=str, choices=['weights', 'huggingface_weights' , 'full'], default='weights', help='Specify pretraining model loading mode derived from how it was saved. Relevant for torch only, default is weights only')
+    parser.add_argument('--torch_save_mode', type=str, choices=['weights'], default='weights', help='Specify pretraining model loading mode derived from how it was saved. Relevant for torch only, default is weights only')
     args = parser.parse_args()
 
     if args.dataset:
@@ -232,7 +233,6 @@ def main():
             pretrained_model.get_learner().model.state_dict()
         )  # don't save the pointer in memory but the entire object
         torch.save(best_model_state, pretrained_torch_path)
-
 
         print(" ===>  Saving pretrained model to ", pretrained_torch_path)
         # Save the model weigths (in pkl format - unsecure but backward compatible in many cases)

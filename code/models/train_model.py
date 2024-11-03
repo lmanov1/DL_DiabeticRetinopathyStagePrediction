@@ -8,17 +8,16 @@ from sklearn.metrics import precision_score, recall_score, f1_score ,roc_auc_sco
 from fastai.losses import CrossEntropyLossFlat
 from code.config import *
 
-from efficientnet_pytorch import EfficientNet
-from transformers import AutoModel
+#from transformers import AutoModel
 import zipfile
 import json
-from tensorflow.keras.models import load_model
-import onnx
-import onnxmltools
-from onnx2pytorch import ConvertModel
 import shutil
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense
+# from tensorflow.keras.models import load_model
+# import onnx
+# import onnxmltools
+# from onnx2pytorch import ConvertModel
+# from tensorflow.keras.models import Sequential
+# from tensorflow.keras.layers import Dense
 
 
 MODEL_FORMAT = ['pth', 'pkl']  # pth - pytorch model, pkl - fastai model
@@ -247,7 +246,7 @@ class CustomModelMethods:
 # dense121: A smaller version of the DenseNet model with 121 layers.
 # 224x224 pixel images were used for training all the above models thus the input size is 224x224x3 for all models after resizing and aug_transforms with DataBlocks.
 pretrained_models = ['vgg16', 'resnet18', 'vgg16_bn', 'resnet34',
-                      'resnet50', 'resnet152', 'efficientnet-b7']
+                      'resnet50', 'resnet152', 'efficientnet-b7','efficientnet-b1']
 transform_sizes = {
     'vgg16': 224,
     'resnet18': 224,
@@ -295,9 +294,12 @@ class PretrainedEyeDiseaseClassifier(nn.Module , CustomModelMethods):
                 num_ftrs = self.model.fc.in_features
                 self.model.fc = nn.Linear(num_ftrs, num_classes)
             elif model_name == 'efficientnet-b7':
-                self.model = EfficientNet.from_pretrained('efficientnet-b7')  # Load pretrained EfficientNet-B7 model
-                num_ftrs = self.model._fc.in_features  # Get the number of input features for the final layer
-                self.model._fc = nn.Linear(num_ftrs, num_classes)  # Replace final layer with a custom one
+                self.model = models.efficientnet_b7(weights= EfficientNet_B7_Weights.IMAGENET1K_V1)
+                #.from_pretrained('efficientnet-b7')  # Load pretrained EfficientNet-B7 model
+                #num_ftrs = self.model._fc.in_features  # Get the number of input features for the final layer
+                num_ftrs = self.model.classifier[1].in_features
+                #self.model._fc = nn.Linear(num_ftrs, num_classes)  # Replace final layer with a custom one
+                self.model.classifier[1] = nn.Linear(num_ftrs, num_classes)
             else:
                 raise ValueError(f"Unsupported model name: {model_name}")
 
@@ -447,8 +449,8 @@ def load_model_from_pth(file_path, export_method = 'weights'):
                     opt_func=partial(Adam, lr=0.001),
                     metrics=[accuracy, model.recall_macro, model.recall_micro , model.precision_macro, model.precision_micro, model.f1_macro, model.f1_micro] )
 
-    elif export_method == 'huggingface_weights':
-        model = AutoModel.from_pretrained(file_path)
+    # elif export_method == 'huggingface_weights':
+    #     model = AutoModel.from_pretrained(file_path)
     elif export_method == 'full':
         conf = None
         extract_dir = 'extracted_model'
@@ -467,56 +469,56 @@ def load_model_from_pth(file_path, export_method = 'weights'):
                 with open(config_path, 'r') as f:
                     conf = json.load(f)                
                     if conf['module'] == 'keras': # neeed to convert to torch format prior to load
-                        print("Keras model detected")
-                        # Step 1: Load the Keras Model
-                        weights_path = os.path.join(extract_dir, 'model.weights.h5')
-                        print(f"weights_path path: {weights_path}")
-                        try:
-                            keras_model = load_model(weights_path)
-                        except Exception as e:
-                            print(f"Error loading keras model: {e}")
-                            raise ValueError(f"Unsupported keras model type without the architecture file. Parsing config.json to reproduce architecture is unsupported.")
-                            # keras_model = create_model(conf)
-                            # keras_model.load_weights(weights_path)
+                        print("Keras model detected - unsupported")
+                        # # Step 1: Load the Keras Model
+                        # weights_path = os.path.join(extract_dir, 'model.weights.h5')
+                        # print(f"weights_path path: {weights_path}")
+                        # try:
+                        #     keras_model = load_model(weights_path)
+                        # except Exception as e:
+                        #     print(f"Error loading keras model: {e}")
+                        #     raise ValueError(f"Unsupported keras model type without the architecture file. Parsing config.json to reproduce architecture is unsupported.")
+                        #     # keras_model = create_model(conf)
+                        #     # keras_model.load_weights(weights_path)
 
-                        # Step 2: Convert Keras Model to ONNX
-                        onnx_model = onnxmltools.convert_keras(keras_model)
-                        # Save ONNX model
-                        onnxmltools.utils.save_model(onnx_model, 'model.onnx')
-                        # Load the ONNX model
-                        onnx_model = onnx.load('model.onnx')
-                        # Convert ONNX model to PyTorch
-                        pytorch_model = ConvertModel(onnx_model)
-                        # Initialize your model class with the converted PyTorch model
-                        if model_name not in pretrained_models:
-                            model = EyeDiseaseClassifier(pytorch_model, num_classes=num_dr_classes)
+                        # # Step 2: Convert Keras Model to ONNX
+                        # onnx_model = onnxmltools.convert_keras(keras_model)
+                        # # Save ONNX model
+                        # onnxmltools.utils.save_model(onnx_model, 'model.onnx')
+                        # # Load the ONNX model
+                        # onnx_model = onnx.load('model.onnx')
+                        # # Convert ONNX model to PyTorch
+                        # pytorch_model = ConvertModel(onnx_model)
+                        # # Initialize your model class with the converted PyTorch model
+                        # if model_name not in pretrained_models:
+                        #     model = EyeDiseaseClassifier(pytorch_model, num_classes=num_dr_classes)
+                        # else:
+                        #     model = PretrainedEyeDiseaseClassifier(pytorch_model, num_classes=num_dr_classes)
+                        # # Step 3: Map Keras Weights to PyTorch
+                        # keras_weights = keras_model.get_weights()
+                        # # Ensure the layers are in the same order and then assign weights
+                        # for idx, layer in enumerate(pytorch_model.layers):
+                        #     layer.weight.data = torch.tensor(keras_weights[idx])
+
+                        # # (Optional) Load additional metadata if necessary
+                        # metadata_path = os.path.join(extract_dir, 'metadata.json')
+                        # with open(metadata_path, 'r') as f:
+                        #     metadata = json.load(f)
+                        #     print(metadata)
+                    else:
+                        print("No keras config file found.")
+                        # Try loading with PyTorch
+                        state_dict = torch.load(file_path, map_location=torch.device('cpu'))
+                        if isinstance(state_dict, dict) and 'model_state_dict' in state_dict:
+                            print("This is a PyTorch state_dict.")
+                            # Load the state_dict into the model
+                            my_model.load_state_dict(state_dict)
+                            model = my_model
                         else:
-                            model = PretrainedEyeDiseaseClassifier(pytorch_model, num_classes=num_dr_classes)
-                        # Step 3: Map Keras Weights to PyTorch
-                        keras_weights = keras_model.get_weights()
-                        # Ensure the layers are in the same order and then assign weights
-                        for idx, layer in enumerate(pytorch_model.layers):
-                            layer.weight.data = torch.tensor(keras_weights[idx])
-
-                        # (Optional) Load additional metadata if necessary
-                        metadata_path = os.path.join(extract_dir, 'metadata.json')
-                        with open(metadata_path, 'r') as f:
-                            metadata = json.load(f)
-                            print(metadata)
-            else:
-                print("No keras config file found.")
-                # Try loading with PyTorch
-                state_dict = torch.load(file_path, map_location=torch.device('cpu'))
-                if isinstance(state_dict, dict) and 'model_state_dict' in state_dict:
-                    print("This is a PyTorch state_dict.")
-                    # Load the state_dict into the model
-                    my_model.load_state_dict(state_dict)
-                    model = my_model
-                else:
-                    print("This is a PyTorch model file.")
-                    # Load the PyTorch model
-                    model = torch.load(file_path)
-                    model = my_model
+                            print("This is a PyTorch model file.")
+                            # Load the PyTorch model
+                            model = torch.load(file_path)
+                            model = my_model
 
         # Remove the extracted_model directory
         shutil.rmtree(extract_dir)

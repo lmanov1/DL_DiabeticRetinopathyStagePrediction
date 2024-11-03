@@ -9,11 +9,14 @@ MODEL_LOCAL_DIR = Path("../../data/output/")
 
 # Upload the models to the repo (dataset)
 models_upload_to_dataset = [    
-    "pretrained_trainLabels19_export.pth",
-    "pretrained_trainLabels19_export.pkl",
-    "v1.0_vgg16_model.keras",
+    # "pretrained_trainLabels19_export.pth",
+    # "pretrained_trainLabels19_export.pkl",
+    # "v1.0_vgg16_model.keras",
     #"vg4.0_model.pkl",
-    "vg4.0_trainLabels1920241026_2103_EfficientNetB7pretrained_model.pth"
+    # "vg4.0_trainLabels1920241026_2103_EfficientNetB7pretrained_model.pth"
+    "resnet50_aptos19train_1.pkl",
+    "vgg16_bn_resized15_19trainLabels15.pth"
+
     ]
 MODEL_DATASET_DIR = Path("models/")
 
