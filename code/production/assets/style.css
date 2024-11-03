@@ -1,0 +1,189 @@
+/* Base container styles */
+.gradio-container {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+#react-root {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+/* Chart customization */
+.recharts-wrapper {
+    margin: 0 auto;
+}
+
+.recharts-default-tooltip {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 6px !important;
+    padding: 8px 12px !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Tabs styling */
+.tabs-list {
+    border-bottom: 1px solid #e2e8f0;
+    margin-bottom: 1rem;
+}
+
+.tab-trigger {
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.tab-trigger[data-state='active'] {
+    color: #0073CF;
+    border-bottom: 2px solid #0073CF;
+}
+
+/* Card styling */
+.card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1.5rem;
+}
+
+.card-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.card-content {
+    padding: 1.5rem;
+}
+
+/* Confusion matrix specific styles */
+.confusion-matrix {
+    display: grid;
+    gap: 1px;
+    background: #f8fafc;
+    padding: 1rem;
+    border-radius: 4px;
+}
+
+.matrix-cell {
+    padding: 0.5rem;
+    text-align: center;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+}
+
+.matrix-cell:hover {
+    transform: scale(1.05);
+}
+
+/* Legend styling */
+.custom-legend {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card {
+        margin: 0.5rem;
+    }
+
+    .card-header,
+    .card-content {
+        padding: 1rem;
+    }
+
+    .custom-legend {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .confusion-matrix {
+        font-size: 0.75rem;
+        padding: 0.5rem;
+    }
+}
+
+/* Loading state */
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #0073CF;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Theme colors */
+:root {
+    --primary-color: #0073CF;
+    --secondary-color: #F5F7FA;
+    --accent-color: #00B5A5;
+    --warning-color: #FF7F50;
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --border-color: #e2e8f0;
+}
+
+/* Print styles */
+@media print {
+    .gradio-container {
+        height: auto !important;
+    }
+
+    .tab-trigger,
+    .custom-legend {
+        display: none !important;
+    }
+
+    .card {
+        break-inside: avoid;
+        box-shadow: none;
+    }
+}
