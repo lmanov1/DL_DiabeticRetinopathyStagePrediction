@@ -22,7 +22,10 @@ files_to_upload = [
     {"./app.py": "./app.py"},
     {"./__init__.py": "./__init__.py"},
     {"./all_defs.py": "./all_defs.py"},
-    {"../config.py": "code/config.py"}
+    {"../config.py": "code/config.py"},
+    {"./assets/dashboard.jsx": "assets/dashboard.jsx"},
+    {"./assets/style.css": "assets/style.css"}
+
 ]
 
 # Upload the files to the repo

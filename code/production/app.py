@@ -1,14 +1,14 @@
 
 import gradio as gr
-import torch 
+import torch
 import torch.nn as nn
 import torch.optim as optim
 from fastai.vision.all import *
 import os
 import sys
 from PIL import Image
-from all_defs import  classes_mapping  , translate_labels 
-from all_defs import REPO_ID , DATASET_REPO_ID , MODEL_DATASET_DIR  , models_upload_to_dataset    
+from all_defs import  classes_mapping  , translate_labels
+from all_defs import REPO_ID , DATASET_REPO_ID , MODEL_DATASET_DIR  , models_upload_to_dataset
 from huggingface_hub import HfApi, login , hf_hub_download
 
 sys.path.append('./')
@@ -21,7 +21,7 @@ examples = ["0a0780ad3395.jpg","0a262e8b2a5a.jpg","0ad36156ad5d.jpg"]
 # print("Checking for CUDA availability...")
 # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # print(f"Using device: {device}")
- 
+
 hf_api_token = os.getenv("MY_TOKEN")
 login(token=hf_api_token)
 api = HfApi()
@@ -38,8 +38,8 @@ file_path = Path(f"{MODEL_DATASET_DIR}/{model_name_to_use}")
 try:
     print(f"Downloading file from Hugging Face Hub: {file_path}")
     pretrained_model_weigths_file =  api.hf_hub_download(
-            repo_id=DATASET_REPO_ID, 
-            filename=str(file_path), 
+            repo_id=DATASET_REPO_ID,
+            filename=str(file_path),
             repo_type="dataset")
     print(f"Downloaded file from Hugging Face Hub: {pretrained_model_weigths_file}")
 
@@ -52,9 +52,9 @@ except Exception as e:
 print(f"Loading model from {pretrained_model_weigths_file}")
 
 model = None
-if model_type == 'pth':    
+if model_type == 'pth':
     model = load_model_from_pth(pretrained_model_weigths_file)
-    
+
 elif model_type == 'pkl':
     model = load_model_from_pkl(pretrained_model_weigths_file)
 elif model_type == 'keras':
@@ -66,16 +66,42 @@ else:
 inf_learner = model.get_learner()
 inf_learner.model.eval()
 print(inf_learner.model)
+
 def classify_img(img):
     pred, idx, probs = inf_learner.predict(img)
     print(f"Prediction: {pred}; Probability: {probs[idx]:.04f}")
-    translated_labels = translate_labels(inf_learner.dls.vocab)    
+    translated_labels = translate_labels(inf_learner.dls.vocab)
     return "## Detected severity of Diabetic Retinopathy ", dict(zip(translated_labels, probs))
 
-image = gr.Image()
-label = gr.Label()
+css_path = Path("assets/style.css")
+custom_css = css_path.read_text()
 
-iface = gr.Interface(fn=classify_img, inputs=image, outputs=
-        [   gr.Markdown("## Please choose a retinal fundus camera image for prediction"), label ], 
-        examples=examples)
-iface.launch()
+
+with gr.Blocks() as Predict:
+    image = gr.Image()
+    label = gr.Label()
+    iface = gr.Interface(fn=classify_img, inputs=image, outputs=
+                [   gr.Markdown("## Please choose a retinal fundus camera image for prediction"), label ],
+                examples=examples)
+
+with gr.Blocks() as Analyze: 
+    gr.HTML('''
+        <div id="metrics-root"></div>
+        <script>
+            // Ensure that the script is loaded only when the tab is visible
+            window.addEventListener('DOMContentLoaded', function() {
+                var script = document.createElement('script');
+                script.src = 'assets/dashboard.jsx';
+                document.body.appendChild(script);
+            });
+        </script>
+    ''')
+
+# Create the interface
+with gr.Blocks(css=custom_css) as demo:
+    gr.Markdown("# Diabetic Retinopathy Stage Prediction")
+    gr.TabbedInterface([Predict, Analyze], ["Predict", "Performance Metrics"])
+# Ensure the custom CSS is included
+demo.css = custom_css
+# Launch the application
+demo.launch()
