@@ -54,20 +54,21 @@ print(f"Loading model from {pretrained_model_weigths_file}")
 model = None
 if model_type == 'pth':    
     model = load_model_from_pth(pretrained_model_weigths_file)
-    inf_learner = model.get_learner()
+    
 elif model_type == 'pkl':
-    inf_learner = load_model_from_pkl(pretrained_model_weigths_file)
+    model = load_model_from_pkl(pretrained_model_weigths_file)
 elif model_type == 'keras':
     print("Keras model is not supported")
     pass
 else:
     raise ValueError(f"Unsupported model format: {model_type}")
 
+inf_learner = model.get_learner()
 inf_learner.model.eval()
 print(inf_learner.model)
 def classify_img(img):
     pred, idx, probs = inf_learner.predict(img)
-    #print(f"Prediction: {pred}; Probability: {probs[idx]:.04f}")
+    print(f"Prediction: {pred}; Probability: {probs[idx]:.04f}")
     translated_labels = translate_labels(inf_learner.dls.vocab)    
     return "## Detected severity of Diabetic Retinopathy ", dict(zip(translated_labels, probs))
 
