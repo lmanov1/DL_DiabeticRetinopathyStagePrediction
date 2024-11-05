@@ -3,7 +3,7 @@ import numpy as np
 import torch
 from sklearn.preprocessing import StandardScaler
 from torchvision import transforms
-from efficientnet_pytorch import EfficientNet
+from efficientnet_pytorch import EfficientNet  # Import EfficientNet if using this library
 from PIL import Image
 import matplotlib.pyplot as plt
 import tensorflow as tf
@@ -11,6 +11,10 @@ import cv2
 import cv2.dnn_superres  # Importing the dnn_superres module
 import pdb
 from sklearn.decomposition import PCA
+import os
+
+
+
 
 
 # Set this environment variable in your development environment
@@ -252,58 +256,65 @@ def perform_pca_on_image(img, n_components=2):
     return img_pca
 
 
-def load_prtrained_model(model_path, device='cpu'):
-        """
-        Load a model from a given path. If the file contains a full model, load it directly;
-        otherwise, load only the state_dict (weights).
 
-        Args:
-            model_path (str): Path to the model file.
-            device (str): 'cuda' or 'cpu', default is 'cpu'.
+def load_pretrained_model(model_path, device='cpu'):
+    """
+    Load a model from a specified path based on file extension. Supports the following:
+    - '.pth': Loads only state_dict (weights).
+    - '.pt': Attempts to load the full model directly.
+    - '.pkl': Uses torch's pickle-compatible loading.
 
-        Returns:
-            torch.nn.Module: The loaded model ready for inference or training, or None if loading fails.
-        """
-        # Set the device
-        device = torch.device(device if torch.cuda.is_available() or device == 'cpu' else 'cpu')
+    Args:
+        model_path (str): Path to the model file.
+        device (str): 'cuda' or 'cpu', default is 'cpu'.
 
-        model = None  # Initialize model variable
+    Returns:
+        torch.nn.Module: The loaded model ready for inference or training.
+    """
+    # Set device
+    device = torch.device(device if torch.cuda.is_available() or device == 'cpu' else 'cpu')
 
-        try:
-            # First, try to load the model file as a full model
+    # Get file extension
+    _, file_extension = os.path.splitext(model_path)
+
+    try:
+        if file_extension == '.pth':
+            # Load weights (state_dict) only
+
+
+            model = EfficientNet.from_name('efficientnet-b7')
+            model.load_state_dict(torch.load(model_path), strict=False)
+            print("Loaded model as weights-only from .pth file.")
+
+        elif file_extension == '.pt':
+            # Load full model directly
             model = torch.load(model_path, map_location=device)
-            print("Loaded full model.")
+            print("Loaded full model from .pt file.")
 
-        except Exception as e:
-            # If loading as a full model fails, try loading as a state_dict
-            print(f"Full model loading failed: {e}. Attempting to load as weights-only.")
-            try:
-                # Attempt to load the model file with weights_only set to True
-                state_dict = torch.load(model_path, map_location=device, weights_only=True)
+        elif file_extension == '.pkl':
+            # Load using pickle-compatible loading
+            model = torch.load(model_path, map_location=device)
+            print("Loaded full model from .pkl file.")
 
-                # Check if the loaded file is a state_dict (weights-only)
-                if isinstance(state_dict, dict):
-                    # Initialize model architecture and load state_dict
-                    model = EfficientNet.from_name('efficientnet-b7')
-                    model.load_state_dict(state_dict)
-                    print("Loaded weights-only model.")
-                else:
-                    print("Loaded model but not in expected format.")
+        else:
+            raise ValueError(f"Unsupported file extension '{file_extension}'")
 
-            except Exception as inner_e:
-                print(f"Error loading weights-only model: {inner_e}")
+    except Exception as e:
+        print(f"Failed to load model: {e}")
+        return None
 
-        if model is not None:
-            # Move the model to the specified device
-            model.to(device)
-            model.eval()  # Set to evaluation mode if using for inference
+    # Move model to specified device and set to eval mode for inference
+    model.to(device)
+    model.eval()
 
-        return model
+    return model
+
 
 
 def eval_start():
-    model_path = r"C:\Users\DELL\Documents\GitHub\DL_DiabeticRetinopathyStagePrediction\diabetic_retinopathy_BU17\model_full.pth"
-    pretrained_model = load_prtrained_model(model_path)
+    # model_path = r"C:\Users\DELL\Documents\GitHub\DL_DiabeticRetinopathyStagePrediction\diabetic_retinopathy_BU17\model_full.pth"
+    model_path = r"C:\Users\DELL\Documents\GitHub\DL_DiabeticRetinopathyStagePrediction\code\data\output\model_full.pth"
+    pretrained_model = load_pretrained_model(model_path)
     pretrained_model.eval()  # Set model to evaluation mode
     return pretrained_model
 
@@ -343,6 +354,7 @@ def preprocess_image(img):
     # print(f"after pca {img.shape}")   # Output shape will be (num_pixels, n_components)
     # img = img.fit_transform(img)
 
+    return img
     ## 4
     # Assuming img is your input tensor of shape [1, 3, 224, 224]
     img = sharpen_image(img)  # First sharpen the image

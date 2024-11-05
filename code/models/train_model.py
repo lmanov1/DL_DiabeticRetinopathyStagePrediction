@@ -21,11 +21,23 @@ class CustomModelMethods:
             self.class_learner = Learner(dls, self, loss_func=criterion, metrics=metrics)
         return self.class_learner  # Return the initialized learner
 
-    def train_model(self, dls, epochs=10):
+    def train_model(self, dls, epochs=10, criterion=None, early_stopping=None):
         """Trains the model using FastAI Learner's fine_tune method for transfer learning or training from scratch."""
         if self.class_learner is None:  # Create learner if not already initialized
-            self.class_learner = Learner(dls, self, loss_func=CrossEntropyLossFlat(), metrics=accuracy)
-        self.class_learner.fine_tune(epochs)  # Perform fine-tuning over `epochs` epochs
+            # Initialize Learner with loss function
+            self.class_learner = Learner(dls, self, loss_func=criterion or nn.CrossEntropyLoss(), metrics=accuracy)
+            self.class_learner.create_opt()  # Create the optimizer
+
+        # Train for the specified number of epochs
+        for epoch in range(epochs):
+            train_loss = self.class_learner.fit_one_cycle(1)  # Train for one epoch
+            val_loss = self.class_learner.validate()[0]  # Get validation loss
+            print(f"Epoch [{epoch + 1}/{epochs}], Train Loss: {train_loss:.4f}, Validation Loss: {val_loss:.4f}")
+
+            # Check for early stopping
+            if early_stopping and early_stopping(val_loss):
+                print(f"Early stopping triggered after epoch {epoch + 1}.")
+                break  # Exit training loop if early stopping is triggered
 
     def evaluate_model(self, dls):
         """Evaluates the model: generates confusion matrix, displays top losses, and calculates accuracy."""
@@ -106,15 +118,13 @@ class CustomModelMethods:
             print(f"Macro Recall: {macro_recall:.4f}")
             print(f"Macro F1 Score: {macro_f1:.4f}")
 
-
-
-
     def save_model(self, filename, mode='weights', pretrained_pkl_path=None):
         """Saves the model weights to the specified file or directory using Hugging Face's save_pretrained method."""
         if mode == 'weights':
             if hasattr(self.class_learner.model, 'save_pretrained'):
+                #Issue fix: Using Hugging Face's save_pretrained method
                 self.class_learner.model.save_pretrained(filename)  # Use Hugging Face method
-                print(f"Model weights saved to {filename}.")
+                print(f"Hugging Face method - Model weights saved to {filename}.")
             else:
                 torch.save(self.class_learner.model.state_dict(), filename)  # Fallback for non-Hugging Face models
                 print(f"Model weights saved to {filename}.")
@@ -126,6 +136,7 @@ class CustomModelMethods:
 
         # Export to pickle file from the learner
         if pretrained_pkl_path is not None:
+            #Issue fix: Ensure compatibility with Hugging Face models
             self.class_learner.export(pretrained_pkl_path)
             print(f"Learner exported to {pretrained_pkl_path}.")
 
@@ -149,6 +160,7 @@ class CustomModelMethods:
 
         except Exception as e:
             if mode == 'weights':
+                #Issue fix: Attempt loading weights with strict=False for compatibility
                 self.class_learner.model.load_state_dict(torch.load(filename, strict=False))
                 print(f"Model weights loaded with strict=False from {filename}. Warning: {e}")
             elif mode == 'full':
@@ -156,7 +168,6 @@ class CustomModelMethods:
                 print(f"Full model loaded with strict=False from {filename}. Warning: {e}")
             else:
                 print(f"An error occurred: {e}. Invalid mode. Use 'full' or 'weights'.")
-
 
 # List of pretrained models we can choose from for transfer learning
 pretrained_models = ['vgg16', 'resnet18', 'efficientnet-b7']
@@ -168,6 +179,7 @@ class PretrainedEyeDiseaseClassifier(nn.Module, CustomModelMethods):
     def __init__(self, num_classes=5, pretrained_model='vgg16'):
         nn.Module.__init__(self)  # Initialize PyTorch's nn.Module
         CustomModelMethods.__init__(self)  # Initialize methods for training/evaluation from the CustomModelMethods class
+        print("Initializing PretrainedEyeDiseaseClassifier...")
 
         # Initialize num_ftrs as an instance variable
         self.num_ftrs = None
@@ -175,26 +187,44 @@ class PretrainedEyeDiseaseClassifier(nn.Module, CustomModelMethods):
         # Choose between VGG16, ResNet18, or EfficientNet-B7 pretrained models
         if pretrained_model == 'vgg16':
             self.model = models.vgg16(pretrained=True)  # Load pretrained VGG16 model
-            self.model.classifier[6] = nn.Linear(4096, num_classes)  # Replace final layer for `num_classes`
             self.num_ftrs = 4096  # Set num_ftrs for VGG16
+            self.model.classifier[6] = nn.Linear(self.num_ftrs, num_classes)  # Replace final layer for `num_classes`
+            print("Using VGG16 model.")
         elif pretrained_model == 'resnet18':
             self.model = models.resnet18(pretrained=True)  # Load pretrained ResNet18 model
             self.num_ftrs = self.model.fc.in_features  # Get the number of input features for the final layer
             self.model.fc = nn.Linear(self.num_ftrs, num_classes)  # Replace final layer with a custom one
+            print("Using ResNet18 model.")
         elif pretrained_model == 'efficientnet-b7':
             self.model = EfficientNet.from_pretrained('efficientnet-b7')  # Load pretrained EfficientNet-B7 model
             self.num_ftrs = self.model._fc.in_features  # Get the number of input features for the final layer
             self.model._fc = nn.Linear(self.num_ftrs, num_classes)  # Replace final layer with a custom one
+            print("Using EfficientNet-B7 model.")
         else:
             raise ValueError("Unsupported pretrained model. Choose 'vgg16', 'resnet18', or 'efficientnet-b7'.")
 
+    def create_fc_layers(self, num_classes, num_ftrs):
+        """Creates custom fully connected layers connected to the pretrained model's output."""
+        print("Creating fully connected layers...")
+        return nn.Sequential(
+            nn.Linear(num_ftrs, 512),  # First fully connected layer
+            nn.ReLU(),  # Activation function
+            nn.Dropout(0.5),  # Dropout for regularization
+            nn.Linear(512, 256),  # Second fully connected layer
+            nn.ReLU(),  # Activation function
+            nn.Dropout(0.5),  # Dropout for regularization
+            nn.Linear(256, num_classes)  # Final layer for classification
+        )
+
     def forward(self, x):
         """Forward pass for the model, which applies the pretrained model's forward pass."""
+        print("Performing forward pass...")
         x = self.model(x)  # Pass input through the model
         return x  # Return the output from the model
 
     def set_num_classes(self, num_classes):
         """Dynamically adjust the final layer to accommodate a new number of classes."""
+        print("Setting number of classes...")
         if isinstance(self.model, models.VGG):
             self.model.classifier[6] = nn.Linear(self.num_ftrs, num_classes)  # Update VGG final layer
         elif isinstance(self.model, models.ResNet):
@@ -203,8 +233,6 @@ class PretrainedEyeDiseaseClassifier(nn.Module, CustomModelMethods):
             self.model._fc = nn.Linear(self.num_ftrs, num_classes)  # Update EfficientNet final layer
 
         print(f"Number of classes updated to {num_classes}.")  # Confirmation message
-
-
 # EyeDiseaseClassifier defines a custom CNN architecture for classifying eye diseases
 class EyeDiseaseClassifier(nn.Module, CustomModelMethods):
     """A custom Convolutional Neural Network (CNN) for classifying eye diseases."""

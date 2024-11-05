@@ -13,6 +13,9 @@ from Util.Terminal_Output import pre_save_actions, post_save_actions
 from sklearn.model_selection import GridSearchCV  # Import GridSearchCV
 from Util.cleanup_resources import clean_up_resources
 import time
+import pdb
+
+DEBUG_MODE = True
 
 # Define the dataset names and paths
 DATASET_NAME_resized15_19 = 'benjaminwarner/resized-2015-2019-blindness-detection-images'  # 18.75 GB
@@ -71,24 +74,90 @@ def check_cuda_availability():
     print(f"Using device: {device}")
     return device
 
+# Function to add prefix before file extension
+def add_prefix_before_extension(file_path, prefix):
+    # Split the file path into name and extension
+    base, ext = os.path.splitext(file_path)
+    # Add the prefix before the extension
+    new_path = f"{base}_{prefix}{ext}"
+    return new_path
 
-# Function to train pretrained model
-def train_pretrained_model(pretrained_model, dls, pretrained_weights_path):
+
+# Function to train inference model with GridSearch for hyperparameter tuning
+def train_pretrained_model(pretrained_model, dls, pretrained_weights_path, criterion=None, quick_debug=None, epochs=10, patience=5):
+    """
+    Trains a pretrained model using the provided data loaders and criterion, implementing early stopping.
+
+    Parameters:
+    - pretrained_model: The model to train.
+    - dls: The DataLoaders containing training and validation data.
+    - pretrained_weights_path: Path to save the model weights.
+    - criterion: The loss function used for training.
+    - epochs: Number of epochs to train for (default is 10).
+    - patience: Number of epochs to wait for improvement before stopping (default is 5).
+    - quick_debug: If True, limits epochs and data size for quick debugging.
+                   If None, uses the provided max_epoch value.
+    - max_epoch: The maximum number of epochs to train for (default is 100).
+
+    Returns:
+    - pretrained_model: The trained model after completing the training process.
+    """
     if not os.path.exists(pretrained_weights_path):
         print("Pretrained model not found - training now...")
         directory = os.path.dirname(pretrained_weights_path)
         if not os.path.exists(directory):
             os.makedirs(directory)
 
-        start_time = time.time()
-        pretrained_model.train_model(dls, epochs=10)
-        end_time = time.time()
-        print_time(start_time, end_time, "Pretrained model training time")
-        pretrained_model.save_model(pretrained_weights_path, 'full')
-        pretrained_model.save_model(pretrained_weights_path, 'weights')
+        # Set up the maximum number of epochs based on quick_debug
+        if quick_debug is None:
+            max_epochs = epochs
+            print(f"max_epoch set as the configuration: {epochs}")
+        elif quick_debug:
+            print("Quick debug mode enabled: Reducing epochs and data size for fast issue detection.")
+            # Reduce data size by sampling small batches from training/validation sets
+            dls.train = dls.train.new(shuffle=True, bs=2)  # Small batch size for quick iterations
+            dls.valid = dls.valid.new(bs=2)
+            max_epochs = 1  # Only 1 epoch for quick debugging
 
-        #torch.save(pretrained_model.state_dict(), pretrained_weights_path)  # save only the weights without the architecture
-        print(" ===>  Saving .pth and .pt  pretrained model to ", pretrained_weights_path)
+        print("Full training mode enabled.")
+
+        # Initialize criterion
+        if criterion is None:
+            criterion = nn.CrossEntropyLoss()  # Default without weights
+
+        # Apply Early Stopping
+        early_stopping = EarlyStopping(patience=patience)
+
+        # Print dataset sizes and DataLoader details
+        print(f"Training dataset size: {len(dls.train_ds)}")
+        print(f"Validation dataset size: {len(dls.valid_ds)}")
+        print(f"Training DataLoader size (number of batches): {len(dls.train)}")
+        print(f"Validation DataLoader size (number of batches): {len(dls.valid)}")
+        print(f"Batch size during training: {dls.train.bs}")
+        print(f"Batch size during validation: {dls.valid.bs}")
+
+        # Print sample data and labels from one batch for sanity check
+        xb_train, yb_train = next(iter(dls.train))
+        print(f"Sample training batch shape: {xb_train.shape}")
+        print(f"Sample training labels shape: {yb_train.shape}")
+
+        xb_valid, yb_valid = next(iter(dls.valid))
+        print(f"Sample validation batch shape: {xb_valid.shape}")
+        print(f"Sample validation labels shape: {yb_valid.shape}")
+
+        # Train the model using the train_model method with early stopping
+        pretrained_model.train_model(dls, epochs=epochs, criterion=criterion, early_stopping=early_stopping)
+
+        # Save model logic
+        full_path = add_prefix_before_extension(pretrained_weights_path, 'full')
+        weights_path = add_prefix_before_extension(pretrained_weights_path, 'weights')
+        PKL_path = add_prefix_before_extension(pretrained_weights_path, 'PKL')
+
+        # Save model with new paths
+        pretrained_model.save_model(full_path, 'full')
+        pretrained_model.save_model(weights_path, 'weights', PKL_path)
+
+        print(" ===>  Saving .pth and .pt pretrained model to ", pretrained_weights_path)
         print(" ===>  Pretrained model training completed.")
         print(" ===>  Evaluating pretrained model...")
         pretrained_model.evaluate_model(dls)
@@ -99,7 +168,6 @@ def train_pretrained_model(pretrained_model, dls, pretrained_weights_path):
     return pretrained_model
 
 
-# Function to train inference model with GridSearch for hyperparameter tuning
 def train_inference_model(inf_model, dls, criterion, quick_debug, patience=5, max_epoch=100):
     """
      Trains a model using the provided data loaders and criterion, implementing early stopping.
@@ -212,7 +280,8 @@ def main():
     # https: // huggingface.co / docs / transformers / model_sharing
     train_dataloaders = {}
 
-    original_stdout, original_stderr = pre_save_actions()
+    # return it later on
+    # original_stdout, original_stderr = pre_save_actions()
     print("Starting the main function...")
 
     # Collect patient data age, sex, systolic blood pressure (SBP), smoking, urinary protein, and HbA1c level as positively associated with the risk
@@ -235,7 +304,6 @@ def main():
     # Skewness
     #Later on set as a function - Hard coded from the excel train 2015 Let's say these are the sample counts for each class
     class_counts = [25810, 2443, 5292, 873, 708]  # Replace with your actual class distribution
-
     # Compute weights inversely proportional to class frequency
     class_weights = [1.0 / count for count in class_counts]
     class_weights = torch.tensor(class_weights, dtype=torch.float32)
@@ -259,8 +327,7 @@ def main():
             pretrained_weights_path = (os.path.join(os.getcwd(), 'data', 'output', pretrained_model_file_name).
                                        replace('/', get_path_separator()))
             print(" \n ===>  Looking for pretrained model here", pretrained_weights_path)
-            pretrained_model = train_pretrained_model(pretrained_model, dls,
-                                                      )
+            pretrained_model = train_pretrained_model(pretrained_model, dls, pretrained_weights_path, criterion, True)
         else:
             print("Skipping pretrained model training.")
 
