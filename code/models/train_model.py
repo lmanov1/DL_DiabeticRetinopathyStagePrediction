@@ -217,8 +217,12 @@ class PretrainedEyeDiseaseClassifier(nn.Module, CustomModelMethods):
         )
 
     def forward(self, x):
-        """Forward pass for the model, which applies the pretrained model's forward pass."""
-        print("Performing forward pass...")
+        """Forward pass for the model, which applies the pretrained model's forward pass.
+        every batch processed during training or validation calls the forward method,
+        and you have a print statement inside that method. so comment it
+        """
+
+        ##print("Performing forward pass...")
         x = self.model(x)  # Pass input through the model
         return x  # Return the output from the model
 
