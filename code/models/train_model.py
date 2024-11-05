@@ -25,7 +25,7 @@ class CustomModelMethods:
         """Trains the model using FastAI Learner's fine_tune method for transfer learning or training from scratch."""
         if self.class_learner is None:  # Create learner if not already initialized
             # Initialize Learner with loss function
-            self.class_learner = Learner(dls, self, loss_func=criterion or nn.CrossEntropyLoss(), metrics=accuracy)
+            self.class_learner = Learner(dls, self, loss_func=criterion, metrics=accuracy)
             self.class_learner.create_opt()  # Create the optimizer
 
         # Train for the specified number of epochs

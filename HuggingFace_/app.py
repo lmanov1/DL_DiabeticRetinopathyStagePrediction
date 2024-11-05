@@ -12,6 +12,7 @@ import cv2.dnn_superres  # Importing the dnn_superres module
 import pdb
 from sklearn.decomposition import PCA
 import os
+from code.models.train_model import PretrainedEyeDiseaseClassifier
 
 
 
@@ -276,19 +277,23 @@ def load_pretrained_model(model_path, device='cpu'):
 
     # Get file extension
     _, file_extension = os.path.splitext(model_path)
+    #print the file_extension
+    print(f"File extension: {file_extension}")
 
     try:
+        print("Loaded procedure")
+        model = EfficientNet.from_name('efficientnet-b7')
+
         if file_extension == '.pth':
             # Load weights (state_dict) only
-
-
-            model = EfficientNet.from_name('efficientnet-b7')
             model.load_state_dict(torch.load(model_path), strict=False)
             print("Loaded model as weights-only from .pth file.")
 
         elif file_extension == '.pt':
             # Load full model directly
             model = torch.load(model_path, map_location=device)
+            if model is None:
+                raise ValueError("Failed to load model from .pt file.")
             print("Loaded full model from .pt file.")
 
         elif file_extension == '.pkl':
@@ -313,7 +318,7 @@ def load_pretrained_model(model_path, device='cpu'):
 
 def eval_start():
     # model_path = r"C:\Users\DELL\Documents\GitHub\DL_DiabeticRetinopathyStagePrediction\diabetic_retinopathy_BU17\model_full.pth"
-    model_path = r"C:\Users\DELL\Documents\GitHub\DL_DiabeticRetinopathyStagePrediction\code\data\output\model_full.pth"
+    model_path = r"C:\Users\DELL\Documents\GitHub\DL_DiabeticRetinopathyStagePrediction\code\data\output\model_full.pt"
     pretrained_model = load_pretrained_model(model_path)
     pretrained_model.eval()  # Set model to evaluation mode
     return pretrained_model
