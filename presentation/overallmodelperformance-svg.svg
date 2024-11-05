@@ -1,0 +1,51 @@
+<svg viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background -->
+    <rect width="800" height="400" fill="#ffffff"/>
+    
+    <!-- Title -->
+    <text x="400" y="40" text-anchor="middle" font-family="Arial" font-size="24" font-weight="bold" fill="#333333">
+        Overall Model Performance
+    </text>
+    
+    <!-- Bar Chart -->
+    <!-- Each bar is 80px wide with 40px spacing -->
+    <!-- Accuracy -->
+    <g transform="translate(100,100)">
+        <rect width="80" height="246.96" y="53.04" fill="#0073CF"/>
+        <text x="40" y="320" text-anchor="middle" font-family="Arial" font-size="14">Accuracy</text>
+        <text x="40" y="40" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold">82.32%</text>
+    </g>
+    
+    <!-- AUC -->
+    <g transform="translate(220,100)">
+        <rect width="80" height="258.12" y="41.88" fill="#00B5A5"/>
+        <text x="40" y="320" text-anchor="middle" font-family="Arial" font-size="14">AUC</text>
+        <text x="40" y="30" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold">86.04%</text>
+    </g>
+    
+    <!-- Precision -->
+    <g transform="translate(340,100)">
+        <rect width="80" height="207.66" y="92.34" fill="#FF7F50"/>
+        <text x="40" y="320" text-anchor="middle" font-family="Arial" font-size="14">Precision</text>
+        <text x="40" y="80" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold">69.22%</text>
+    </g>
+    
+    <!-- Recall -->
+    <g transform="translate(460,100)">
+        <rect width="80" height="141.96" y="158.04" fill="#FFB347"/>
+        <text x="40" y="320" text-anchor="middle" font-family="Arial" font-size="14">Recall</text>
+        <text x="40" y="145" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold">47.32%</text>
+    </g>
+    
+    <!-- F1 Score -->
+    <g transform="translate(580,100)">
+        <rect width="80" height="151.2" y="148.8" fill="#87CEEB"/>
+        <text x="40" y="320" text-anchor="middle" font-family="Arial" font-size="14">F1 Score</text>
+        <text x="40" y="135" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold">50.40%</text>
+    </g>
+    
+    <!-- Y-axis -->
+    <line x1="80" y1="100" x2="80" y2="350" stroke="#333333" stroke-width="2"/>
+    <text x="70" y="110" text-anchor="end" font-family="Arial" font-size="12">100%</text>
+    <text x="70" y="350" text-anchor="end" font-family="Arial" font-size="12">0%</text>
+</svg>

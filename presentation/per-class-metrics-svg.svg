@@ -1,0 +1,72 @@
+<svg viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background -->
+    <rect width="800" height="500" fill="#ffffff"/>
+    
+    <!-- Title -->
+    <text x="400" y="40" text-anchor="middle" font-family="Arial" font-size="24" font-weight="bold" fill="#333333">
+        Per-Class Performance Metrics
+    </text>
+    
+    <!-- Legend -->
+    <g transform="translate(600,80)">
+        <rect x="0" y="0" width="20" height="20" fill="#0073CF"/>
+        <text x="30" y="15" font-family="Arial" font-size="14">Precision</text>
+        
+        <rect x="0" y="30" width="20" height="20" fill="#00B5A5"/>
+        <text x="30" y="45" font-family="Arial" font-size="14">Recall</text>
+        
+        <rect x="0" y="60" width="20" height="20" fill="#FF7F50"/>
+        <text x="30" y="75" font-family="Arial" font-size="14">F1 Score</text>
+    </g>
+    
+    <!-- Chart -->
+    <g transform="translate(100,100)">
+        <!-- Y-axis -->
+        <line x1="0" y1="0" x2="0" y2="300" stroke="#333333" stroke-width="2"/>
+        <text x="-10" y="0" text-anchor="end" font-family="Arial" font-size="12">100%</text>
+        <text x="-10" y="300" text-anchor="end" font-family="Arial" font-size="12">0%</text>
+        
+        <!-- X-axis -->
+        <line x1="0" y1="300" x2="500" y2="300" stroke="#333333" stroke-width="2"/>
+        
+        <!-- Class 0 -->
+        <g transform="translate(40,0)">
+            <rect width="20" height="42" y="258" fill="#0073CF"/>
+            <rect width="20" height="6" x="25" y="294" fill="#00B5A5"/>
+            <rect width="20" height="27" x="50" y="273" fill="#FF7F50"/>
+            <text x="25" y="320" text-anchor="middle" font-family="Arial" font-size="14">Class 0</text>
+        </g>
+        
+        <!-- Class 1 -->
+        <g transform="translate(140,0)">
+            <rect width="20" height="99" y="201" fill="#0073CF"/>
+            <rect width="20" height="297" x="25" y="3" fill="#00B5A5"/>
+            <rect width="20" height="297" x="50" y="3" fill="#FF7F50"/>
+            <text x="25" y="320" text-anchor="middle" font-family="Arial" font-size="14">Class 1</text>
+        </g>
+        
+        <!-- Class 2 -->
+        <g transform="translate(240,0)">
+            <rect width="20" height="102" y="198" fill="#0073CF"/>
+            <rect width="20" height="117" x="25" y="183" fill="#00B5A5"/>
+            <rect width="20" height="111" x="50" y="189" fill="#FF7F50"/>
+            <text x="25" y="320" text-anchor="middle" font-family="Arial" font-size="14">Class 2</text>
+        </g>
+        
+        <!-- Class 3 -->
+        <g transform="translate(340,0)">
+            <rect width="20" height="111" y="189" fill="#0073CF"/>
+            <rect width="20" height="198" x="25" y="102" fill="#00B5A5"/>
+            <rect width="20" height="168" x="50" y="132" fill="#FF7F50"/>
+            <text x="25" y="320" text-anchor="middle" font-family="Arial" font-size="14">Class 3</text>
+        </g>
+        
+        <!-- Class 4 -->
+        <g transform="translate(440,0)">
+            <rect width="20" height="105" y="195" fill="#0073CF"/>
+            <rect width="20" height="171" x="25" y="129" fill="#00B5A5"/>
+            <rect width="20" height="144" x="50" y="156" fill="#FF7F50"/>
+            <text x="25" y="320" text-anchor="middle" font-family="Arial" font-size="14">Class 4</text>
+        </g>
+    </g>
+</svg>
