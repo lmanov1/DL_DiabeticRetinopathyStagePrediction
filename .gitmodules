@@ -1,0 +1,3 @@
+[submodule "src/ESRGAN"]
+	path = src/ESRGAN
+	url = https://github.com/xinntao/ESRGAN.git
