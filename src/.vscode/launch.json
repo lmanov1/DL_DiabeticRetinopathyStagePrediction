@@ -1,0 +1,13 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Current File",  // This name will appear in the dropdown when you start debugging
+            "type": "python",                 // Specifies the type of configuration
+            "request": "launch",              // Indicates that we want to launch the program
+            "program": "${file}",             // The current file in the editor will be run
+            "console": "integratedTerminal",  // Output will be shown in the integrated terminal
+            "justMyCode": false               // Set to false so you can step into library code
+        }
+    ]
+}
