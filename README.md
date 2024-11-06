@@ -43,6 +43,17 @@ pip 24.2
     `python3 /code/main.py`  Running with `poetry run python.exe /code/main.py` on Windows does problems with import fastai , so use just `python.exe /code/main.py` Don't ask why.
 
 
+8. For upscaling images, I used the GitHub repository (https://github.com/xinntao/ESRGAN.git), located in the src/ESRGAN folder.
+
+    Steps to Prepare:
+    Before running the program, download the trained model .pth file from Google Drive.
+    Place the downloaded model file in the src/ESRGAN/models directory.
+    You can access the model file from the following link: https://drive.google.com/drive/u/0/folders/17VYV_SoZZesU6mbxz2dMAIccSSlqLecY.
+
+    Required File Name:
+    Make sure the file is named RRDB_ESRGAN_x4.pth
+
+
 ## Project Blueprint: Diabetic Retinopathy Severity Classification
 ### Project Setup
     Dev Environment Setup:
