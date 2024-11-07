@@ -45,6 +45,14 @@ pip 24.2
 
 8. For upscaling images, I used the GitHub repository (https://github.com/xinntao/ESRGAN.git), located in the src/ESRGAN folder.
 
+    How to bring the upscaling project files from https://github.com/xinntao/ESRGAN.git (as submodule) for the first time:
+		1. git clone git@github.com:lmanov1/DL_DiabeticRetinopathyStagePrediction.git
+		   as usual 
+		2. cd DL_DiabeticRetinopathyStagePrediction
+		   (+ git  switch to relevant branch - optional)		
+		3. git submodule update --init --recursive --progress
+	       will bring the upscaling project files from git
+
     Steps to Prepare:
     Before running the program, download the trained model .pth file from Google Drive.
     Place the downloaded model file in the src/ESRGAN/models directory.
