@@ -197,8 +197,8 @@ def run_with_best_params(params = None):
 
 def main():
     study = optuna.create_study(direction='maximize')
-    # study.optimize(objective, n_trials=50)  # Optimize based on precision
-    study.optimize(objective, n_trials=10)  # Optimize based on precision
+    # study.optimize(objective, n_trials=50)  # Optimize based on macro recall
+    study.optimize(objective, n_trials=10)  # Optimize based on macro recall
     print("Best hyperparameters: ", study.best_params)
     best_trial = study.best_trial
     print("Best trial value: ", best_trial.value)
