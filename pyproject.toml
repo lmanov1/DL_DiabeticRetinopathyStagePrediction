@@ -11,6 +11,8 @@ package-mode = false
 
 #torchvision = "^0.19.1"
 # torchaudio = "^2.4.1"
+# pickle = "*"
+# tomlkit = "^0.12.2"
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.12"
@@ -20,14 +22,13 @@ fastai = "^2.7.17"
 seaborn = "^0.13.2"
 pandas = "^2.2.3"
 huggingface = "^0.0.1"
-#tomlkit = "^0.12.2"
 requests = "^2.32.3"
 kaggle = "^1.5.12"
 tensorflow-io-gcs-filesystem = "^0.31.0"
 tensorflow = "*"
 torch = "*"
+torchvision = "*"
 gradio = "^5.1.0"
-#pickle = "*"
 environs = "^11.0.0"
 gdown = "^5.2.0"
 
