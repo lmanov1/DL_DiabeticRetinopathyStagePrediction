@@ -300,10 +300,11 @@ def get_sample_weights(dls, class_weights):
     for idx in range(len(dls.train_ds)):
         label = dls.train_ds[idx][1]  # Get the label of each sample
         # print the label and the idx
-        print(f"idx: {idx}, label: {label}")
         sample_weights.append(class_weights[label])
         # print the sample_weights
-        print(f"sample_weights: {sample_weights} fit to:{label}")
+        if quick_debug:
+            print(f"idx: {idx}, label: {label}")
+            print(f"sample_weights: {sample_weights} fit to:{label}")
     return torch.tensor(sample_weights, dtype=torch.float32)
 
 
