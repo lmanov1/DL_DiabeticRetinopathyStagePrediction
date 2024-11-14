@@ -14,6 +14,7 @@ from transformers import AutoModel  # Import for Hugging Face model saving
 from fastai.callback.progress import ProgressCallback
 from fastai.learner import load_learner
 from Util.training_Logger import TrainingLogger
+import pandas as pd
 
 
 class CustomModelMethods:
@@ -69,7 +70,6 @@ class CustomModelMethods:
             else:
                 print(f"Epoch [{epoch + 1}/{epochs}], Incomplete epoch data.")
 
-
     def evaluate_model(self, dls):
         """Evaluates the model: generates confusion matrix, displays top losses, and calculates accuracy."""
         print("Using validation DataLoader for evaluation.")
@@ -119,6 +119,10 @@ class CustomModelMethods:
 
         preds = torch.argmax(preds, dim=1)
 
+        # Print each label and its corresponding prediction
+        for i in range(len(preds)):
+            print(f"Validation Image {i + 1}: True Label = {targets[i].item()}, Predicted Label = {preds[i].item()}")
+
         # Check for unique classes in targets and preds
         unique_targets = set(targets.numpy())
         unique_preds = set(preds.numpy())
@@ -148,7 +152,6 @@ class CustomModelMethods:
             print(f"Macro Precision: {macro_precision:.4f}")
             print(f"Macro Recall: {macro_recall:.4f}")
             print(f"Macro F1 Score: {macro_f1:.4f}")
-
 
     def save_model_(self, filename, mode='weights'):
         """Saves the model weights to the specified file or directory using Hugging Face's save_pretrained method."""
@@ -217,7 +220,7 @@ class PretrainedEyeDiseaseClassifier(nn.Module, CustomModelMethods):
             print("Using ResNet18 model.")
         elif pretrained_model == 'efficientnet-b7':
             self.model = EfficientNet.from_pretrained('efficientnet-b7')  # Load pretrained EfficientNet-B7 model
-            self.num_ftrs = self.m._fc.in_features  # Get the number of input features for the final layer
+            self.num_ftrs = self.model._fc.in_features   # Get the number of input features for the final layer
             # self.model._fc = nn.Linear(self.num_ftrs, num_classes)  # Replace final layer with a custom one
             self.model._fc = self.create_fc_layers(num_classes, self.num_ftrs) # return
             print("Using EfficientNet-B7 model.")
