@@ -13,6 +13,7 @@ from Util.Terminal_Output import pre_save_actions, post_save_actions
 from sklearn.model_selection import GridSearchCV  # Import GridSearchCV
 from Util.cleanup_resources import clean_up_resources
 import time
+import csv
 import pdb
 
 DEBUG_MODE = True
@@ -59,7 +60,11 @@ def download_datasets(dataset_path, datasets):
     return kaggle_loader
 
 
-# Function to load and prepare data
+import os
+import csv
+
+
+#Function to load and prepare data
 def load_and_prepare_data(kaggle_loader, dataset_structure):
     train_dataloaders = {}
     for dataset in dataset_structure:
@@ -132,12 +137,14 @@ def train_pretrained_model(pretrained_model, dls, pretrained_weights_path, crite
             epochs = epochs
             print(f"max_epoch set as the configuration: {epochs}")
         elif quick_debug:
-            print("Quick debug mode enabled: Reducing epochs and data size for fast issue detection.")
+
             # Reduce data size by sampling small batches from training/validation sets
             dls.train = dls.train.new(shuffle=True, bs=2)  # Small batch size for quick iterations
             dls.valid = dls.valid.new(bs=2)
-            epochs = 1  # Only 1 epoch for quick debugging
-
+            epochs = 5  # Only 1 epoch for quick debugging
+            print(f"Quick debug mode enabled: Reducing epochs and data size for fast issue detection. run with Maxepochs#:{epochs} batches=2 ")
+            print ("So there are  max Epoc run , each epoch run over all data set of training , when it split to batches. "
+                   "number of images per batch is (data set image number/number of bacthes")
         # Initialize criterion
         if criterion is None:
             criterion = nn.CrossEntropyLoss()  # Default without weights
