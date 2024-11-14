@@ -2,62 +2,26 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from fastai.vision.all import *
+
+from Util.ImageManipulation import image_manip
 from code.Util.MultiPlatform import *
+from PIL import Image
+import matplotlib.pyplot as plt
 
-# This class is used to load previously downloaded data from a CSV file (for labels) and a correstponding 
-# folder (for images)
+#from code.Util.ImageManipulation import image_manip
+#from code.data.raw.imageManiTransform import ImageManipTransform
 
-# class DataPreparation:
-#     def __init__(self, file_path):
-#         self.file_path = file_path
-#         self.data = None
-#         self.train_data = None
-#         self.test_data = None
-#         self.scaler = StandardScaler()
-# def load_data(self):
-#     """
-#     Load data from a CSV file.
-#     """
-#     self.data = pd.read_csv(self.file_path)
-#     print(f"Data loaded from {self.file_path}")
-#     def preprocess_data(self):
-#         """
-#         Preprocess data, such as scaling and handling missing values.
-#         """
-#         # Handle missing values
-#         self.data = self.data.dropna()
 
-#         # Scaling features
-#         features = self.data.drop('target', axis=1)
-#         target = self.data['target']
-#         features_scaled = self.scaler.fit_transform(features)
+# Define your custom callback to apply multiple transformations
+def custom_callback(image: Image):
+    # Apply multiple transformations in sequence
+    # image = Resize(400)(image)  # Resize to 400x400
+    # image = Flip(p=0.5)(image)  # Random horizontal flip with 50% chance
+    # image = Rotate(max_deg=15)(image)  # Random rotation with max of 15 degrees
+    # image = RandomCrop(224)(image)  # Random crop to 224x224
+    image = image_manip(image)
+    return image
 
-#         self.data = pd.DataFrame(features_scaled, columns=features.columns)
-#         self.data['target'] = target
-#         print("Data preprocessed")
-
-#     def split_data(self, test_size=0.2):
-#         """
-#         Split data into training and testing sets.
-#         """
-#         features = self.data.drop('target', axis=1)
-#         target = self.data['target']
-#         self.train_data, self.test_data = train_test_split(self.data, test_size=test_size, random_state=42)
-#         print(f"Data split into training and testing sets with test size = {test_size}")
-
-#     def get_train_data(self):
-#         return self.train_data
-
-#     def get_test_data(self):
-#         return self.test_data
-
-# Example usage
-# data_prep = DataPreparation('path_to_your_csv_file.csv')
-# data_prep.load_data()
-# data_prep.preprocess_data()
-# data_prep.split_data()
-# train_data = data_prep.get_train_data()
-# test_data = data_prep.get_test_data()
 
 # This class is used to prepare image data for training and validation using the fastai library.
 # Initialization: Takes paths to the CSV file and image folder, along with other parameters like label column, validation split percentage, batch size, and random seed.
@@ -70,53 +34,68 @@ class DataPreparation:
     def __init__(self, csv_path, img_folder,
                    valid_pct=0.2, batch_size=32, seed=42):
         self.csv_path = csv_path
-        self.img_folder = img_folder + get_path_separator()      
+        self.img_folder = img_folder + get_path_separator()
         self.valid_pct = valid_pct
         self.batch_size = batch_size
         self.seed = seed
         self.dls = None
+
+
 
     def load_data(self):
         """
         Load data from a CSV file and create a DataBlock for image processing.
         """
         df = pd.read_csv(self.csv_path)
-        print(f"Data loaded from {self.csv_path}")               
+        print(f"Data loaded from {self.csv_path}")
         df[df.columns[0]] = df[df.columns[0]].astype(str) + '.jpg'
 
         print("Checking for missing files...")
         print("df shape Before: ", df.shape)
 
-        # Check if the image files exist    
+        # Check if the image files exist
         missing_files = df[~df[df.columns[0]].apply(lambda x: (self.img_folder + x)).map(Path).map(Path.exists)]
         if not missing_files.empty:
             print(f"Missing files {missing_files.shape}:")
             print(missing_files)
             # Remove rows with missing files
             df = df[df[df.columns[0]].apply(lambda x: (self.img_folder + x)).map(Path).map(Path.exists)]
-            #df.dropna(inplace=True)
             print("After removing missing files, df shape: ", df.shape)
 
         print(" df columns: ", df.columns)
-        df.info()        
+        df.info()
         df.head()
-        df.value_counts()
+
+        # Ensure proper dataloader creation
         try:
+            # Define the DataBlock with transformations
             dblock = DataBlock(
-            blocks=(ImageBlock, CategoryBlock),
-            get_x=ColReader(df.columns[0], pref=self.img_folder),
-            get_y=ColReader(df.columns[1]),
-            splitter=RandomSplitter(valid_pct=self.valid_pct, seed=self.seed),
-            item_tfms=Resize(224), # Updated it was 460
-            batch_tfms=aug_transforms(size=224, min_scale=0.75)
-            )    
-        except FileNotFoundError:
-            print(f"File not found. Skipping to the next file.")
-            
-            pass
-        
-        self.dls = dblock.dataloaders(df, bs=self.batch_size)
-        print(f"data loaders : {self.dls}")
+                blocks=(ImageBlock, CategoryBlock),
+                get_x=ColReader(df.columns[0], pref=self.img_folder),
+                get_y=ColReader(df.columns[1]),
+                splitter=RandomSplitter(valid_pct=self.valid_pct, seed=self.seed),
+                item_tfms=[
+                    Resize(1024),  # Ensures all images are resized to 1024x1024 before custom callback
+                    custom_callback  # Custom callback applied after resizing to consistent dimensions
+                ],
+                batch_tfms=aug_transforms(size=600, min_scale=0.75)
+            )
+
+            plt.ion()  # Turn on interactive mode
+            # Create dataloaders
+            self.dls = dblock.dataloaders(df, bs=self.batch_size, num_workers=0)  # Create dataloaders
+
+            # fig, ax = plt.subplots(1, 1, figsize=(10, 10))
+            # Show a batch of training data
+            print(f"len of self.dls.train:", len(self.dls.train))  # Check the length of the training data
+            # self.dls.show_batch(ax=ax)
+            # plt.show()  # Display the plot
+            print("DataBlock loaded successfully.")
+
+        except Exception as e:
+            print(f"Error loading DataBlock: {e}")
+
+        return self.dls
 
     def normalize_data(self):
         """

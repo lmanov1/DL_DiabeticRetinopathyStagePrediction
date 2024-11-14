@@ -135,9 +135,9 @@ def high_pass_filter(image_tensor, save=False):
         enhanced_image_pil.save("high_pass_filtered_image.png")  # Save image
 
     # Show the enhanced image using matplotlib
-    plt.imshow(enhanced_image)
-    plt.axis('off')  # Turn off axis numbers and ticks
-    plt.show()
+    # plt.imshow(enhanced_image)
+    # plt.axis('off')  # Turn off axis numbers and ticks
+    # plt.show()
 
     return enhanced_tensor
 

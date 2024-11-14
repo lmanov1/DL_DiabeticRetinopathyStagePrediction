@@ -1,12 +1,20 @@
 # Importing necessary libraries for model training, evaluation, and transfer learning
+import joblib
+from fastai.callback.tensorboard import TensorBoardCallback
 from fastai.vision.all import *  # Useful for building and training vision models and quick Learner setup
 import torch  # PyTorch, the core framework for defining models and tensors, building neural networks
 import torch.nn as nn  # Neural network layers from PyTorch
 import torchvision.models as models  # Contains pre-built, pretrained models like ResNet and VGG.
+from fastai.metrics import accuracy
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix,precision_score, recall_score, f1_score # Used for calculating accuracy, generating classification reports, and plotting confusion matrices.
 import torch.nn.functional as F  # Functional layers, like activation functions and utilities for the forward pass.
 from efficientnet_pytorch import EfficientNet
 from transformers import AutoModel  # Import for Hugging Face model saving
+# Training with Fastai progress tracking
+from fastai.callback.progress import ProgressCallback
+from fastai.learner import load_learner
+from Util.training_Logger import TrainingLogger
+
 
 class CustomModelMethods:
     """CustomModelMethods is a base class that defines methods for training and evaluating a model using FastAI."""
@@ -21,23 +29,46 @@ class CustomModelMethods:
             self.class_learner = Learner(dls, self, loss_func=criterion, metrics=metrics)
         return self.class_learner  # Return the initialized learner
 
-    def train_model(self, dls, epochs=10, criterion=None, early_stopping=None):
-        """Trains the model using FastAI Learner's fine_tune method for transfer learning or training from scratch."""
-        if self.class_learner is None:  # Create learner if not already initialized
-            # Initialize Learner with loss function
+
+    from fastai.metrics import accuracy
+
+    def train_model(self, dls, epochs=4, criterion=None, early_stopping=None):
+        if self.class_learner is None:
             self.class_learner = Learner(dls, self, loss_func=criterion, metrics=accuracy)
-            self.class_learner.create_opt()  # Create the optimizer
+            self.class_learner.create_opt()
 
-        # Train for the specified number of epochs
+        print("Starting training...")
+
+        # Use fit_one_cycle and observe the detailed debug output
+        # Now train the model with the custom callback
+        self.class_learner.fit_one_cycle(epochs)  #  TrainingLogger(), ProgressCallback()  cbs=[TensorBoardCallback(log_dir='my_logs')]
+        print("Training completed.")
+
+        print("Recorded training losses:", self.class_learner.recorder.losses)
+        print("Recorded validation values:", self.class_learner.recorder.values)
+
+        # Display metrics and check recorder contents
         for epoch in range(epochs):
-            train_loss = self.class_learner.fit_one_cycle(1)  # Train for one epoch
-            val_loss = self.class_learner.validate()[0]  # Get validation loss
-            print(f"Epoch [{epoch + 1}/{epochs}], Train Loss: {train_loss:.4f}, Validation Loss: {val_loss:.4f}")
+            if len(self.class_learner.recorder.losses) > epoch:
+                train_loss = float(self.class_learner.recorder.losses[epoch])
+            else:
+                train_loss = None
+                print(f"No training loss recorded for epoch {epoch + 1}")
 
-            # Check for early stopping
-            if early_stopping and early_stopping(val_loss):
-                print(f"Early stopping triggered after epoch {epoch + 1}.")
-                break  # Exit training loop if early stopping is triggered
+            if len(self.class_learner.recorder.values) > epoch:
+                val_metrics = self.class_learner.recorder.values[epoch]
+                val_loss = val_metrics[0]
+                accuracy_val = val_metrics[1] if len(val_metrics) > 1 else None
+            else:
+                val_loss = accuracy_val = None
+                print(f"No validation metrics recorded for epoch {epoch + 1}")
+
+            if train_loss is not None and val_loss is not None:
+                print(f"Epoch [{epoch + 1}/{epochs}], Train Loss: {train_loss:.4f}, Validation Loss: {val_loss:.4f}, "
+                      f"Accuracy: {accuracy_val:.4f}" if accuracy_val else "")
+            else:
+                print(f"Epoch [{epoch + 1}/{epochs}], Incomplete epoch data.")
+
 
     def evaluate_model(self, dls):
         """Evaluates the model: generates confusion matrix, displays top losses, and calculates accuracy."""
@@ -118,56 +149,45 @@ class CustomModelMethods:
             print(f"Macro Recall: {macro_recall:.4f}")
             print(f"Macro F1 Score: {macro_f1:.4f}")
 
-    def save_model(self, filename, mode='weights', pretrained_pkl_path=None):
+
+    def save_model_(self, filename, mode='weights'):
         """Saves the model weights to the specified file or directory using Hugging Face's save_pretrained method."""
+
         if mode == 'weights':
             if hasattr(self.class_learner.model, 'save_pretrained'):
-                #Issue fix: Using Hugging Face's save_pretrained method
-                self.class_learner.model.save_pretrained(filename)  # Use Hugging Face method
+                # Using Hugging Face's save_pretrained method for compatible models
+                self.class_learner.model.save_pretrained(filename)
                 print(f"Hugging Face method - Model weights saved to {filename}.")
             else:
-                torch.save(self.class_learner.model.state_dict(), filename)  # Fallback for non-Hugging Face models
+                torch.save(self.class_learner.model.state_dict(), filename)
                 print(f"Model weights saved to {filename}.")
+
         elif mode == 'full':
-            torch.save(self.class_learner, filename)
-            print(f"Full model saved to {filename}.")
+            # Using joblib to save the entire model
+            joblib.dump(self.class_learner, filename)
+            print(f"Full model saved to {filename} using joblib.")
+
         else:
             raise ValueError("Invalid mode. Use 'full' or 'weights'.")
 
-        # Export to pickle file from the learner
-        if pretrained_pkl_path is not None:
-            #Issue fix: Ensure compatibility with Hugging Face models
-            self.class_learner.export(pretrained_pkl_path)
-            print(f"Learner exported to {pretrained_pkl_path}.")
+    import joblib
+    import torch
 
     def load_model(self, filename, mode='full'):
         """Loads the model weights or the full model from the specified file."""
-        try:
-            if filename.endswith('.pth') or filename.endswith('.pt'):
-                if mode == 'weights':
-                    self.class_learner.model.load_state_dict(torch.load(filename))
-                    print(f"Model weights loaded from {filename}.")
-                elif mode == 'full':
-                    self.class_learner = torch.load(filename)  # Load the entire model
-                    print(f"Full model loaded from {filename}.")
-                else:
-                    raise ValueError("Invalid mode. Use 'full' or 'weights'.")
-            elif filename.endswith('.pkl'):
-                self.class_learner = torch.load(filename)  # Load the entire learner from the pickle file
-                print(f"Full model loaded from {filename}.")
-            else:
-                raise ValueError("Unsupported file extension. Use .pth, .pt, or .pkl.")
-
-        except Exception as e:
+        if filename.endswith('.pth') or filename.endswith('.pt'):
             if mode == 'weights':
-                #Issue fix: Attempt loading weights with strict=False for compatibility
-                self.class_learner.model.load_state_dict(torch.load(filename, strict=False))
-                print(f"Model weights loaded with strict=False from {filename}. Warning: {e}")
+                self.class_learner.model.load_state_dict(torch.load(filename))
+                print(f"Model weights loaded from {filename}.")
             elif mode == 'full':
-                self.class_learner = torch.load(filename, strict=False)
-                print(f"Full model loaded with strict=False from {filename}. Warning: {e}")
+                # Using joblib to load the entire model
+                self.class_learner = joblib.load(filename)
+                print(f"Full model loaded from {filename} using joblib.")
             else:
-                print(f"An error occurred: {e}. Invalid mode. Use 'full' or 'weights'.")
+                raise ValueError("Invalid mode. Use 'full' or 'weights'.")
+        else:
+            raise ValueError("Unsupported file extension. Use .pth, .pt, or .joblib.")
+
 
 # List of pretrained models we can choose from for transfer learning
 pretrained_models = ['vgg16', 'resnet18', 'efficientnet-b7']
@@ -197,8 +217,9 @@ class PretrainedEyeDiseaseClassifier(nn.Module, CustomModelMethods):
             print("Using ResNet18 model.")
         elif pretrained_model == 'efficientnet-b7':
             self.model = EfficientNet.from_pretrained('efficientnet-b7')  # Load pretrained EfficientNet-B7 model
-            self.num_ftrs = self.model._fc.in_features  # Get the number of input features for the final layer
-            self.model._fc = nn.Linear(self.num_ftrs, num_classes)  # Replace final layer with a custom one
+            self.num_ftrs = self.m._fc.in_features  # Get the number of input features for the final layer
+            # self.model._fc = nn.Linear(self.num_ftrs, num_classes)  # Replace final layer with a custom one
+            self.model._fc = self.create_fc_layers(num_classes, self.num_ftrs) # return
             print("Using EfficientNet-B7 model.")
         else:
             raise ValueError("Unsupported pretrained model. Choose 'vgg16', 'resnet18', or 'efficientnet-b7'.")

@@ -4,8 +4,8 @@ import torch
 import torch.nn as nn
 from code.models.callbacks.early_stopping import EarlyStopping
 from code.models.train_model import EyeDiseaseClassifier, PretrainedEyeDiseaseClassifier, pretrained_models
-from code.data import data_preparation as DataPrep
-from code.data import Dataloader as KaggleDataLoader
+from code.data.data_preparation import DataPreparation as DataPrep
+from code.data.dataloader import KaggleDataDownLoader as KaggleDataLoader
 from fastai.vision.all import *
 from Util.MultiPlatform import *
 from Util.Terminal_Output import save_terminal_output_to_file as terminal_out
@@ -22,21 +22,36 @@ DATASET_NAME_resized15_19 = 'benjaminwarner/resized-2015-2019-blindness-detectio
 DATASET_NAME_aptos19 = 'mariaherrerot/aptos2019'  # 8.6GB
 DATASET_PATH = 'data/raw/'
 
-# Define the dataset structure
-dataset_train_structure_resized15_19 = [
-    {
-        'labels': 'labels/trainLabels15.csv',
-        'images': 'resized train 15'
-    }
-]
+# Flag to determine the initialization
+quick_debug = True  # Change this to False to switch initialization
+
+# Define the dataset structure based on the quick_debug flag
+if not quick_debug:
+    dataset_train_structure_resized15_19 = [
+        {
+            'labels': 'labels/trainLabels15.csv',
+            'images': 'resized train 15'
+        }
+    ]
+else:
+    dataset_train_structure_resized15_19 = [
+        {
+            'labels': 'labels/trainLabels19A.csv',
+            'images': 'resized train 19A'
+        }
+        # Quick 100 images
+    ]
+
+# Print the dataset structure to verify the initialization
+print(dataset_train_structure_resized15_19)
+
 
 DATASETS = [DATASET_NAME_resized15_19, DATASET_NAME_aptos19]
-
 
 # Function to download datasets
 def download_datasets(dataset_path, datasets):
     print("Downloading datasets...")
-    kaggle_loader = KaggleDataLoader.KaggleDataDownLoader(dataset_path, datasets[0])
+    kaggle_loader = KaggleDataLoader(dataset_path, datasets[0])
     print(f"Dataset downloaded into {kaggle_loader.dataset_dir}")
     return kaggle_loader
 
@@ -52,7 +67,7 @@ def load_and_prepare_data(kaggle_loader, dataset_structure):
         print(f"Labels path: {dataset['labels']} \nImages path: {dataset['images']}")
         print("=====================================")
 
-        dataloader = DataPrep.DataPreparation(dataset['labels'], dataset['images'])
+        dataloader = DataPrep(dataset['labels'], dataset['images'])
         dataloader.load_data()
         dls = dataloader.get_dataloaders()
 
@@ -60,7 +75,7 @@ def load_and_prepare_data(kaggle_loader, dataset_structure):
         print(f"Loaded {len(dls.train_ds)} training samples.")
         print(f"Loaded {len(dls.valid_ds)} validation samples.")
 
-        dls.show_batch()
+        #dls.show_batch() #cause issue
         train_dataloaders[dataset['labels']] = dls
         print("=====================================")
 
@@ -102,6 +117,7 @@ def train_pretrained_model(pretrained_model, dls, pretrained_weights_path, crite
     Returns:
     - pretrained_model: The trained model after completing the training process.
     """
+
     if not os.path.exists(pretrained_weights_path):
         print("Pretrained model not found - training now...")
         directory = os.path.dirname(pretrained_weights_path)
@@ -110,16 +126,14 @@ def train_pretrained_model(pretrained_model, dls, pretrained_weights_path, crite
 
         # Set up the maximum number of epochs based on quick_debug
         if quick_debug is None:
-            max_epochs = epochs
+            epochs = epochs
             print(f"max_epoch set as the configuration: {epochs}")
         elif quick_debug:
             print("Quick debug mode enabled: Reducing epochs and data size for fast issue detection.")
             # Reduce data size by sampling small batches from training/validation sets
             dls.train = dls.train.new(shuffle=True, bs=2)  # Small batch size for quick iterations
             dls.valid = dls.valid.new(bs=2)
-            max_epochs = 1  # Only 1 epoch for quick debugging
-
-        print("Full training mode enabled.")
+            epochs = 1  # Only 1 epoch for quick debugging
 
         # Initialize criterion
         if criterion is None:
@@ -136,32 +150,36 @@ def train_pretrained_model(pretrained_model, dls, pretrained_weights_path, crite
         print(f"Batch size during training: {dls.train.bs}")
         print(f"Batch size during validation: {dls.valid.bs}")
 
-        # Print sample data and labels from one batch for sanity check
-        xb_train, yb_train = next(iter(dls.train))
-        print(f"Sample training batch shape: {xb_train.shape}")
-        print(f"Sample training labels shape: {yb_train.shape}")
-
-        xb_valid, yb_valid = next(iter(dls.valid))
-        print(f"Sample validation batch shape: {xb_valid.shape}")
-        print(f"Sample validation labels shape: {yb_valid.shape}")
+        # # Print sample data and labels from one batch for sanity check
+        # xb_train, yb_train = next(iter(dls.train))
+        # print(f"Sample training batch shape: {xb_train.shape}")
+        # print(f"Sample training labels shape: {yb_train.shape}")
+        #
+        # xb_valid, yb_valid = next(iter(dls.valid))
+        # print(f"Sample validation batch shape: {xb_valid.shape}")
+        # print(f"Sample validation labels shape: {yb_valid.shape}")
 
         # Train the model using the train_model method with early stopping
         pretrained_model.train_model(dls, epochs=epochs, criterion=criterion, early_stopping=early_stopping)
 
         # Save model logic
-        full_path = add_prefix_before_extension(pretrained_weights_path, 'full')
-        weights_path = add_prefix_before_extension(pretrained_weights_path, 'weights')
         PKL_path = add_prefix_before_extension(pretrained_weights_path, 'PKL')
+        #torcth cant save the full components due to not support pickle parts of the model so there is only one export to pkl
+        full_path = add_prefix_before_extension(PKL_path, 'full')
+        weights_path = add_prefix_before_extension(pretrained_weights_path, 'weights')
+
 
         # Save model with new paths
-        pretrained_model.save_model(full_path, 'full')
-        pretrained_model.save_model(weights_path, 'weights', PKL_path)
+        pretrained_model.save_model_(weights_path, 'weights')
+        #pretrained_model.save_model_(full_path, 'full')
+
 
         print(" ===>  Saving .pth and .pt pretrained model to ", pretrained_weights_path)
         print(" ===>  Pretrained model training completed.")
         print(" ===>  Evaluating pretrained model...")
         pretrained_model.evaluate_model(dls)
-        terminal_out(pretrained_weights_path)
+
+        #terminal_out(pretrained_weights_path)
     else:
         print(" ===>  Pretrained model already exists at ", pretrained_weights_path)
 
@@ -280,6 +298,7 @@ def main():
     # https: // huggingface.co / docs / transformers / model_sharing
     train_dataloaders = {}
 
+
     # return it later on
     # original_stdout, original_stderr = pre_save_actions()
     print("Starting the main function...")
@@ -289,7 +308,6 @@ def main():
 
     # Download datasets into DATASET_PATH
     kaggle_loader = download_datasets(DATASET_PATH, DATASETS)
-
 
     train_dataloaders = load_and_prepare_data(kaggle_loader, dataset_train_structure_resized15_19)
 
@@ -327,7 +345,7 @@ def main():
             pretrained_weights_path = (os.path.join(os.getcwd(), 'data', 'output', pretrained_model_file_name).
                                        replace('/', get_path_separator()))
             print(" \n ===>  Looking for pretrained model here", pretrained_weights_path)
-            pretrained_model = train_pretrained_model(pretrained_model, dls, pretrained_weights_path, criterion, True)
+            pretrained_model = train_pretrained_model(pretrained_model, dls, pretrained_weights_path, criterion, quick_debug)
         else:
             print("Skipping pretrained model training.")
 
@@ -358,7 +376,7 @@ def main():
                 # Added for validation batch size
                 print(f"Batch size during validation: {dls.valid.bs}")
 
-                #quick_debug = False, True or None not set
+
                 inf_model = train_inference_model(inf_model, dls, criterion, None, patience=5, max_epoch=max_epoch)
 
                 trained_weights_path = save_trained_model(inf_model, dataset_name)
@@ -373,7 +391,7 @@ def main():
                 print("Model evaluation complete for dataset:", dataset_name)
                 clean_up_resources()  # after long run several iteration Pycharm crash.
 
-    post_save_actions(original_stdout, original_stderr)
+    #post_save_actions(original_stdout, original_stderr)
 
 
 # Call the main function

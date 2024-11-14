@@ -21,7 +21,7 @@ class KaggleDataDownLoader:
         """
         Create the Kaggle API JSON file if it doesn't exist.
         """
-        if ( self.kaggle_json_path == None):
+        if (self.kaggle_json_path == None):
             # Find the pre-installed kaggle API key
             home_directory = get_home_directory()
             self.kaggle_json_path = os.path.join(home_directory, '.kaggle', 'kaggle.json')
@@ -29,18 +29,6 @@ class KaggleDataDownLoader:
         
         if not os.path.exists(self.kaggle_json_path):
             raise FileNotFoundError(f"Kaggle JSON file not found at {self.kaggle_json_path}")
-
-        # if not os.path.exists(self.kaggle_json_path):
-        #     api_token = {
-        #         "username": "your_kaggle_username",
-        #         "key": "your_kaggle_key"
-        #     }
-        #     os.makedirs(os.path.dirname(self.kaggle_json_path), exist_ok=True)
-        #     with open(self.kaggle_json_path, 'w') as file:
-        #         json.dump(api_token, file)
-        #     print(f"{self.kaggle_json_path} created.")
-        # else:
-        #     print(f"{self.kaggle_json_path} already exists.")
 
     def setup_kaggle_api(self):
         """
