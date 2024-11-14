@@ -19,7 +19,8 @@ def custom_callback(image: Image):
     # image = Flip(p=0.5)(image)  # Random horizontal flip with 50% chance
     # image = Rotate(max_deg=15)(image)  # Random rotation with max of 15 degrees
     # image = RandomCrop(224)(image)  # Random crop to 224x224
-    image = image_manip(image)
+    # image = image_manip(image) -
+    print("Pipeline: no custom_callback")
     return image
 
 
@@ -32,12 +33,13 @@ def custom_callback(image: Image):
 # Show Batch: Displays a batch of images with labels for quick visualization.
 class DataPreparation:
     def __init__(self, csv_path, img_folder,
-                   valid_pct=0.2, batch_size=32, seed=42):
+                   valid_pct=0.2, batch_size=32, seed=42, sampler=None):
         self.csv_path = csv_path
         self.img_folder = img_folder + get_path_separator()
         self.valid_pct = valid_pct
         self.batch_size = batch_size
         self.seed = seed
+        self.sampler = None
         self.dls = None
 
 

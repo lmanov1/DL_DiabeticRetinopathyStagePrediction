@@ -33,6 +33,7 @@ if not quick_debug:
             'images': 'resized train 15'
         }
     ]
+    class_counts = [25810, 2443, 5292, 873, 708]  # Replace with your actual class distribution
 else:
     dataset_train_structure_resized15_19 = [
         {
@@ -41,6 +42,7 @@ else:
         }
         # Quick 100 images
     ]
+    class_counts = [43, 13, 28, 7, 9]  # Replace with your actual class distribution
 
 # Print the dataset structure to verify the initialization
 print(dataset_train_structure_resized15_19)
@@ -52,6 +54,7 @@ DATASETS = [DATASET_NAME_resized15_19, DATASET_NAME_aptos19]
 def download_datasets(dataset_path, datasets):
     print("Downloading datasets...")
     kaggle_loader = KaggleDataLoader(dataset_path, datasets[0])
+
     print(f"Dataset downloaded into {kaggle_loader.dataset_dir}")
     return kaggle_loader
 
@@ -292,6 +295,16 @@ def collect_patient_data():
     print("Collecting patient data...")
     return patient_data
 
+def get_sample_weights(dls, class_weights):
+    sample_weights = []
+    for idx in range(len(dls.train_ds)):
+        label = dls.train_ds[idx][1]  # Get the label of each sample
+        # print the label and the idx
+        print(f"idx: {idx}, label: {label}")
+        sample_weights.append(class_weights[label])
+        # print the sample_weights
+        print(f"sample_weights: {sample_weights} fit to:{label}")
+    return torch.tensor(sample_weights, dtype=torch.float32)
 
 
 def main():
@@ -309,7 +322,11 @@ def main():
     # Download datasets into DATASET_PATH
     kaggle_loader = download_datasets(DATASET_PATH, DATASETS)
 
+
+
     train_dataloaders = load_and_prepare_data(kaggle_loader, dataset_train_structure_resized15_19)
+
+
 
     # Check if CUDA is available and set the device accordingly
     device = check_cuda_availability()
@@ -321,7 +338,7 @@ def main():
 
     # Skewness
     #Later on set as a function - Hard coded from the excel train 2015 Let's say these are the sample counts for each class
-    class_counts = [25810, 2443, 5292, 873, 708]  # Replace with your actual class distribution
+
     # Compute weights inversely proportional to class frequency
     class_weights = [1.0 / count for count in class_counts]
     class_weights = torch.tensor(class_weights, dtype=torch.float32)
@@ -335,6 +352,10 @@ def main():
     pretrained_model.to(device)
 
     for key, dls in train_dataloaders.items():
+
+        # # Compute sample weights
+        sample_weights = get_sample_weights(dls, class_weights)
+
         dataset_name = os.path.basename(key).split('.')[0]
         skip_pretrained = False  # Ensure that pretrained model is used
 
