@@ -19,7 +19,7 @@ def custom_callback(image: Image):
     # image = Flip(p=0.5)(image)  # Random horizontal flip with 50% chance
     # image = Rotate(max_deg=15)(image)  # Random rotation with max of 15 degrees
     # image = RandomCrop(224)(image)  # Random crop to 224x224
-    # image = image_manip(image) -
+    image = image_manip(image) -
     print("Pipeline: no custom_callback")
     return image
 
