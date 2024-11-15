@@ -141,7 +141,7 @@ def train_pretrained_model(pretrained_model, dls, pretrained_weights_path, crite
             # Reduce data size by sampling small batches from training/validation sets
             dls.train = dls.train.new(shuffle=True, bs=2)  # Small batch size for quick iterations
             dls.valid = dls.valid.new(bs=2)
-            epochs = 5  # Only 1 epoch for quick debugging
+            epochs = 15  # Only 1 epoch for quick debugging
             print(f"Quick debug mode enabled: Reducing epochs and data size for fast issue detection. run with Maxepochs#:{epochs} batches=2 ")
             print ("So there are  max Epoc run , each epoch run over all data set of training , when it split to batches. "
                    "number of images per batch is (data set image number/number of bacthes")
@@ -232,7 +232,7 @@ def train_inference_model(inf_model, dls, criterion, quick_debug, patience=5, ma
         print("Full training mode enabled.")
 
     # Adjust learning rate
-    inf_learner = inf_model.get_learner(dls, criterion, accuracy)
+    inf_learner = inf_model.get_learner(dls, criterion, [Precision(average='macro'), Recall(average='macro')]  )
 
     # Apply Early Stopping
     early_stopping = EarlyStopping(patience=patience)
@@ -284,7 +284,7 @@ def train_inference_model(inf_model, dls, criterion, quick_debug, patience=5, ma
 # Function to save trained model
 def save_trained_model(inf_model, dataset_name):
 
-    timestamp = datetime.now().strftime('%Y%m%d_%H%M')
+    timestamp = datetime.now().strftime('%Y%m')
     trained_model_file_name = f"{dataset_name}{timestamp}_infer_trained_model.pth"
     # trained_model_file_name = dataset_name + '_trained_model.pth'
     trained_weights_path = os.path.join(os.getcwd(), 'data', 'output', trained_model_file_name).replace('/',
@@ -351,8 +351,13 @@ def main():
     class_weights = [1.0 / count for count in class_counts]
     class_weights = torch.tensor(class_weights, dtype=torch.float32)
 
+    # Normalize weights so they sum to 1
+    class_weights /= class_weights.sum()
+
     # Initialize CrossEntropyLoss with class weights
     criterion = nn.CrossEntropyLoss(weight=class_weights)
+
+
 
 
     inf_model = EyeDiseaseClassifier(num_classes=num_dr_classes)
@@ -369,7 +374,7 @@ def main():
 
         if not skip_pretrained:
             # Create a timestamp for the filename
-            timestamp = datetime.now().strftime('%Y%m%d_%H%M')
+            timestamp = datetime.now().strftime('%Y%m')
             pretrained_model_file_name = f"{dataset_name}{timestamp}_pretrained_model.pth"
             pretrained_weights_path = (os.path.join(os.getcwd(), 'data', 'output', pretrained_model_file_name).
                                        replace('/', get_path_separator()))

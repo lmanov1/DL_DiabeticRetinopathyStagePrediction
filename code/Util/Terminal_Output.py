@@ -30,7 +30,7 @@ def save_terminal_output_to_file(output_dir="logs", filename_prefix="terminal_ou
         os.makedirs(universal_path)
 
     # Create a timestamp for the filename
-    timestamp = datetime.now().strftime('%Y%m%d_%H%M')
+    timestamp = datetime.now().strftime('%Y%m')
     filename = f"{filename_prefix}_{timestamp}.txt"
     file_path = os.path.join(universal_path, filename)
 

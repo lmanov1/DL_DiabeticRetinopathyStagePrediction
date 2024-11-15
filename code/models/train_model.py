@@ -6,7 +6,10 @@ import torch  # PyTorch, the core framework for defining models and tensors, bui
 import torch.nn as nn  # Neural network layers from PyTorch
 import torchvision.models as models  # Contains pre-built, pretrained models like ResNet and VGG.
 from fastai.metrics import accuracy
-from sklearn.metrics import accuracy_score, classification_report, confusion_matrix,precision_score, recall_score, f1_score # Used for calculating accuracy, generating classification reports, and plotting confusion matrices.
+
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+from sklearn.metrics import precision_score, recall_score, f1_score
+
 import torch.nn.functional as F  # Functional layers, like activation functions and utilities for the forward pass.
 from efficientnet_pytorch import EfficientNet
 from transformers import AutoModel  # Import for Hugging Face model saving
@@ -31,44 +34,116 @@ class CustomModelMethods:
         return self.class_learner  # Return the initialized learner
 
 
-    from fastai.metrics import accuracy
-
     def train_model(self, dls, epochs=4, criterion=None, early_stopping=None):
+        """
+        Train the model using the specified data loaders, loss criterion, and early stopping.
+
+        Parameters:
+        - dls: DataLoader object, contains training and validation data.
+        - epochs: int, number of training epochs.
+        - criterion: loss function, e.g., Focal Loss for handling imbalanced data.
+        - early_stopping: EarlyStopping object, used to stop training early if validation loss does not improve.
+
+        This method creates a learner, sets the optimizer, and trains the model using the fit_one_cycle method.
+        The training and validation loss, as well as other specified metrics, are recorded and displayed.
+        """
+        # Initialize the learner with Focal Loss if specified as criterion
         if self.class_learner is None:
-            self.class_learner = Learner(dls, self, loss_func=criterion, metrics=accuracy)
+            self.class_learner = Learner(
+                dls,
+                self,
+                loss_func=criterion,
+                metrics=[Precision(average='macro'), Recall(average='macro')]
+            )
             self.class_learner.create_opt()
 
         print("Starting training...")
 
-        # Use fit_one_cycle and observe the detailed debug output
-        # Now train the model with the custom callback
-        self.class_learner.fit_one_cycle(epochs)  #  TrainingLogger(), ProgressCallback()  cbs=[TensorBoardCallback(log_dir='my_logs')]
-        print("Training completed.")
+        # Train for the full number of epochs with early stopping checks
+        for epoch in range(epochs):
+            # Train for one cycle of the full epoch using fit_one_cycle(1)
+            print(f"Epoch {epoch + 1}/{epochs} - Starting training cycle...")
+            self.class_learner.fit_one_cycle(1)  # Complete one cycle for the current epoch
 
+            # Retrieve the training loss
+            train_loss = self.class_learner.recorder.losses[epoch] if len(
+                self.class_learner.recorder.losses) > epoch else None
+
+            # Retrieve the validation metrics
+            val_metrics = self.class_learner.recorder.values[epoch] if len(
+                self.class_learner.recorder.values) > epoch else None
+            if val_metrics:
+                val_loss = val_metrics[0]
+                precision_val = val_metrics[1] if len(val_metrics) > 1 else None
+                recall_val = val_metrics[2] if len(val_metrics) > 2 else None
+            else:
+                val_loss = precision_val = recall_val = None
+
+            # Display training and validation metrics for the epoch
+            print(
+                f"Epoch [{epoch + 1}/{epochs}], Train Loss: {train_loss:.4f}" if train_loss else 'N/A',
+                f"Validation Loss: {val_loss:.4f}" if val_loss else 'N/A',
+                f"Precision: {precision_val:.4f}" if precision_val else 'N/A',
+                f"Recall: {recall_val:.4f}" if recall_val else 'N/A'
+            )
+
+            # Calculate confusion matrix for each epoch
+            preds, true_labels = [], []
+            for batch in dls.valid:
+                inputs, labels = batch
+                outputs = self(inputs)
+                _, predicted = torch.max(outputs, 1)
+                preds.extend(predicted.cpu().numpy())
+                true_labels.extend(labels.cpu().numpy())
+            cm = confusion_matrix(true_labels, preds)
+            print(f"Confusion Matrix for epoch {epoch + 1}:\n{cm}")
+
+            # Early stopping check if early_stopping is provided and val_loss is available
+            if early_stopping and val_loss is not None:
+                if early_stopping(val_loss):
+                    print(f"Early stopping triggered after epoch {epoch + 1}")
+                    break
+
+        print("Training completed.")
         print("Recorded training losses:", self.class_learner.recorder.losses)
         print("Recorded validation values:", self.class_learner.recorder.values)
 
-        # Display metrics and check recorder contents
-        for epoch in range(epochs):
-            if len(self.class_learner.recorder.losses) > epoch:
-                train_loss = float(self.class_learner.recorder.losses[epoch])
-            else:
-                train_loss = None
-                print(f"No training loss recorded for epoch {epoch + 1}")
-
-            if len(self.class_learner.recorder.values) > epoch:
-                val_metrics = self.class_learner.recorder.values[epoch]
-                val_loss = val_metrics[0]
-                accuracy_val = val_metrics[1] if len(val_metrics) > 1 else None
-            else:
-                val_loss = accuracy_val = None
-                print(f"No validation metrics recorded for epoch {epoch + 1}")
-
-            if train_loss is not None and val_loss is not None:
-                print(f"Epoch [{epoch + 1}/{epochs}], Train Loss: {train_loss:.4f}, Validation Loss: {val_loss:.4f}, "
-                      f"Accuracy: {accuracy_val:.4f}" if accuracy_val else "")
-            else:
-                print(f"Epoch [{epoch + 1}/{epochs}], Incomplete epoch data.")
+    # def train_model(self, dls, epochs=4, criterion=None, early_stopping=None):
+    #     if self.class_learner is None:
+    #         self.class_learner = Learner(dls, self, loss_func=criterion, metrics=[Precision(average='macro'), Recall(average='macro')]  )
+    #         self.class_learner.create_opt()
+    #
+    #     print("Starting training...")
+    #
+    #     # Use fit_one_cycle and observe the detailed debug output
+    #     # Now train the model with the custom callback
+    #     self.class_learner.fit_one_cycle(epochs)  #  TrainingLogger(), ProgressCallback()  cbs=[TensorBoardCallback(log_dir='my_logs')]
+    #     print("Training completed.")
+    #
+    #     print("Recorded training losses:", self.class_learner.recorder.losses)
+    #     print("Recorded validation values:", self.class_learner.recorder.values)
+    #
+    #     # Display metrics and check recorder contents
+    #     for epoch in range(epochs):
+    #         if len(self.class_learner.recorder.losses) > epoch:
+    #             train_loss = float(self.class_learner.recorder.losses[epoch])
+    #         else:
+    #             train_loss = None
+    #             print(f"No training loss recorded for epoch {epoch + 1}")
+    #
+    #         if len(self.class_learner.recorder.values) > epoch:
+    #             val_metrics = self.class_learner.recorder.values[epoch]
+    #             val_loss = val_metrics[0]
+    #             accuracy_val = val_metrics[1] if len(val_metrics) > 1 else None
+    #         else:
+    #             val_loss = accuracy_val = None
+    #             print(f"No validation metrics recorded for epoch {epoch + 1}")
+    #
+    #         if train_loss is not None and val_loss is not None:
+    #             print(f"Epoch [{epoch + 1}/{epochs}], Train Loss: {train_loss:.4f}, Validation Loss: {val_loss:.4f}, "
+    #                   f"Accuracy: {accuracy_val:.4f}" if accuracy_val else "")
+    #         else:
+    #             print(f"Epoch [{epoch + 1}/{epochs}], Incomplete epoch data.")
 
     def evaluate_model(self, dls):
         """Evaluates the model: generates confusion matrix, displays top losses, and calculates accuracy."""
@@ -76,7 +151,7 @@ class CustomModelMethods:
         print(f"Validation DataLoader size: {len(dls.valid)}")
 
         if self.class_learner is None:
-            self.class_learner = Learner(dls.valid, self, loss_func=CrossEntropyLossFlat(), metrics=accuracy)
+            self.class_learner = Learner(dls.valid, self, loss_func=CrossEntropyLossFlat(), metrics=[Precision(average='macro'), Recall(average='macro')]  )
 
         # Check dataset sizes during evaluation
         print(f"Validation dataset size: {len(dls.valid_ds)}")
