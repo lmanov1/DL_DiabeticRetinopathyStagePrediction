@@ -170,3 +170,7 @@ models/*.keras
 notebooks/logs/*
 notebooks/runs/*
 notebooks/data/*
+notebooks/graphs/*
+notebooks/models/*
+.vscode/
+code/production/data/
