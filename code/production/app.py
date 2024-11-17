@@ -106,9 +106,9 @@ inf_learner = Learner(
 early_stopping = EarlyStopping(patience=5)
 
 #device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-if model_type == 'pth':    
-    model = torch.load(pretrained_model_weigths_file,map_location=torch.device("cpu"))   
-    inf_learner.model = model   
+if model_type == 'pth':
+    model = torch.load(pretrained_model_weigths_file,map_location=torch.device("cpu"))
+    inf_learner.model = model
 
 elif model_type == 'pkl':
     inf_learner = load_learner(pretrained_model_weigths_file)
@@ -120,7 +120,7 @@ elif model_type == 'keras':
 else:
     raise ValueError(f"Unsupported model format: {model_type}")
 
-class_names = ['No DR', 'Mild DR', 'Moderate DR', 'Severe DR', 'Proliferative DR']  
+class_names = ['No DR', 'Mild DR', 'Moderate DR', 'Severe DR', 'Proliferative DR']
 inf_learner.create_opt()
 inf_learner.model.eval()
 
@@ -128,68 +128,43 @@ from fastai.vision.all import *
 import numpy as np
 from PIL import Image
 
-# def preprocess_image(img_path):
-#     # Load the image
-#     pil_img = Image.open(img_path).convert("RGB")
-#     # Convert to fastai PILImage
-#     fastai_img = PILImage.create(pil_img)
-#     # Resize to 460 before batching 
-#     resize_tfm = Resize(460)
-#     resized_img = resize_tfm(fastai_img)
-
-#     # Convert the PIL image to a tensor 
-#     transform_to_tensor = transforms.ToTensor() 
-#     tensor_img = transform_to_tensor(resized_img)
-
-#     #Apply augmentation transformations (resize to 224 with augmentations) 
-#     batch_tfms = aug_transforms(size=224)
-#    # Create a temporary DataLoader to apply batch transformations 
-#     dl = DataLoaders.from_dsets(([tensor_img], [0]), bs=1, after_batch=batch_tfms).test_dl([tensor_img]) 
-#     # Fetch the first batch (this applies the transformations) 
-#     processed_tensor_img = dl.one_batch()[0] 
-#     # Add a batch dimension 
-#     processed_tensor_img = processed_tensor_img.unsqueeze(0)
-#     return processed_tensor_img
-#     return tensor_img
-
-
 def classify_img(img):
      # 'img' is a NumPy array with shape (height, width, 3)
-    try:        
-        print(f'received from gradio: {img}') 
-        print(f"!!!!!!!!!!!Image type: {type(img)}")       
-        
+    try:
+        print(f'received from gradio: {img}')
+        print(f"Image type: {type(img)}")
+
         # Make a prediction using the learner
         pred, idx, probs = inf_learner.predict(img)
         print(f"Prediction: {pred}; Probability: {probs[idx]:.04f}")
-        print( f"probs: {probs}" )       
-        return "## Detected severity of Diabetic Retinopathy ", dict(zip(class_names, probs))       
-        
+        print( f"probs: {probs}" )
+        return "## Detected severity of Diabetic Retinopathy ", dict(zip(class_names, probs))
+
     except Exception as e:
         print(f"Debug - Error details: {str(e)}")
         traceback.print_exc()
         return f"Error during prediction: {str(e)}", None
-  
+
 
 import traceback
 def validate():
-    try:               
-        img_shape = dls.train.one_batch()[0].shape 
+    try:
+        img_shape = dls.train.one_batch()[0].shape
         print(f'Shape of the image: {img_shape}')
-    
-        preds, targets = inf_learner.get_preds(dl=dls.train) 
-        print(f'Predictions: {preds[:5]}, Targets: {targets[:5]}') 
-		
-        # Show results (sample predictions) 
+
+        preds, targets = inf_learner.get_preds(dl=dls.train)
+        print(f'Predictions: {preds[:5]}, Targets: {targets[:5]}')
+
+        # Show results (sample predictions)
         print("Learner's show results..")
-        inf_learner.show_results() 
+        inf_learner.show_results()
         fig_sample_preds = plt.gcf()  # Get the current figure
         writer.add_figure('Learner show results', fig_sample_preds)
         plt.show()  # Ensure the plot is displayed
         #plt.close(fig_sample_preds)
-        
-        # Interpret the model 
-        interp = ClassificationInterpretation.from_learner(inf_learner) 
+
+        # Interpret the model
+        interp = ClassificationInterpretation.from_learner(inf_learner)
 
         # Plot top losses
         print("Plotting top losses...")
@@ -201,23 +176,23 @@ def validate():
         writer.add_figure('Top Losses', interp_tl_fig)
         plt.show()  # Ensure the plot is displayed
         #plt.close(interp_tl_fig)
-        
+
         most_confused = interp.most_confused(min_val=2)
         print("Most confused classes:")
         print(most_confused)
         most_confused_text = ""
-        for i, (predicted, actual, count) in enumerate(most_confused):    
+        for i, (predicted, actual, count) in enumerate(most_confused):
             predicted = int(predicted)
             actual = int(actual)
-            most_confused_text += str(f"{i + 1}: {class_names[predicted]} ({predicted}) vs {class_names[actual]} ({actual}) : ({count} samples)")  
-            most_confused_text += "\n" 
+            most_confused_text += str(f"{i + 1}: {class_names[predicted]} ({predicted}) vs {class_names[actual]} ({actual}) : ({count} samples)")
+            most_confused_text += "\n"
         writer.add_text('Most Confused Classes', most_confused_text)
         print('Most Confused Classes\n' + most_confused_text)
-        
+
         conf_preds = np.argmax(preds, axis=1)
         conf_targets = targets.numpy()
         # Confusion matrix
-        cm = confusion_matrix(conf_targets, conf_preds)      
+        cm = confusion_matrix(conf_targets, conf_preds)
         # Plot confusion matrix
         fig_conf_matrix = plot_confusion_matrix(cm, classes=class_names, normalize=True, title='Normalized Confusion Matrix', tensorboard_writer=writer)
         #fig_conf_matrix = plot_confusion_matrix(cm, classes=class_names, tensorboard_writer=writer)
@@ -249,21 +224,21 @@ def validate():
 
         # ROC AUC
         print("Plotting ROC AUC...")
-        roc_auc_fig = plot_roc_auc(class_names, class_targets, class_preds, tensorboard_writer=writer)        
+        roc_auc_fig = plot_roc_auc(class_names, class_targets, class_preds, tensorboard_writer=writer)
         # Plot and log sample predictions
         print("Plotting 10 Sample Predictions...")
-        fig_sample_preds = plot_sample_predictions(dls.train, class_preds, class_targets, path, tensorboard_writer= writer)  
-        	
-        
+        fig_sample_preds = plot_sample_predictions(dls.train, class_preds, class_targets, path, tensorboard_writer= writer)
+
+
         writer.close()
-       
+
         return [
                     #torchvision_graph_file,
                     report_text,
                     most_confused_text,
                     fig_sample_preds,   #inf_learner.show_results(),
-                    interp_tl_fig,    # top losses                 
-                    roc_auc_fig,      # ROC AUC   
+                    interp_tl_fig,    # top losses
+                    roc_auc_fig,      # ROC AUC
                     fig_conf_matrix   # confusion matrix
                 ]
     except Exception as e:
@@ -281,16 +256,14 @@ inf_learner.remove_cb(fastai.callback.progress.ProgressCallback)
 demo = gr.Blocks()
 
 with demo:
-    
+
     gr.Markdown("# Diabetic Retinopathy Detection System")
-    
+
     with gr.Tabs():
-        with gr.Tab("Single Image Prediction"):            
-            #type="pil"
-            #image_input = gr.Image(type="filepath"),
+        with gr.Tab("Single Image Prediction"):
             markdown_output = gr.Markdown("## Please choose a retinal fundus camera image for prediction")
-            label_output = gr.Label()            
-                        
+            label_output = gr.Label()
+
             gr.Interface(
                 fn=classify_img,
                 inputs=gr.Image(type="pil", label="Choose Image to classify"),
@@ -299,8 +272,8 @@ with demo:
                 title="Single Image Prediction",
                 cache_examples=False
             )
-            
-        with gr.Tab("Model Analysis"):          
+
+        with gr.Tab("Model Analysis"):
             #model_graph = gr.Image(label="Model Architecture")
             report = gr.Textbox(label="Classification Report", lines=10)
             confused = gr.Textbox(label="Most Confused Classes", lines=10)
@@ -308,10 +281,10 @@ with demo:
             top_losses = gr.Plot(label="Top 5 Losses")
             roc_auc = gr.Plot(label="Area under the ROC curve")
             conf_matrix = gr.Plot(label="Confusion Matrix")
-                        
+
             gr.Interface(
                 fn=validate,
-                inputs=None,                          
+                inputs=None,
                 outputs=[report, confused , predictions, top_losses , roc_auc ,conf_matrix],
                 title="Model Validation"
             )
