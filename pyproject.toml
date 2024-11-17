@@ -33,6 +33,7 @@ environs = "^11.0.0"
 gdown = "^5.2.0"
 tensorboard = "^2.18.0"
 efficientnet-pytorch = "^0.7.1"
+torchviz = "^0.0.2"
 
 [build-system]
 requires = ["poetry-core"]

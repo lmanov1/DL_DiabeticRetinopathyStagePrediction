@@ -169,3 +169,4 @@ models/*.pkl
 models/*.keras
 notebooks/logs/*
 notebooks/runs/*
+notebooks/data/*
