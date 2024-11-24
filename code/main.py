@@ -15,8 +15,11 @@ from Util.cleanup_resources import clean_up_resources
 import time
 import csv
 import pdb
+import logging
 
-DEBUG_MODE = True
+DEBUG_MODE = False  # not in debug
+
+logging.basicConfig(level=logging.DEBUG)
 
 # Define the dataset names and paths
 DATASET_NAME_resized15_19 = 'benjaminwarner/resized-2015-2019-blindness-detection-images'  # 18.75 GB
@@ -24,7 +27,7 @@ DATASET_NAME_aptos19 = 'mariaherrerot/aptos2019'  # 8.6GB
 DATASET_PATH = 'data/raw/'
 
 # Flag to determine the initialization
-quick_debug = True  # Change this to False to switch initialization
+quick_debug = False  # Change this to False to switch initialization
 
 # Define the dataset structure based on the quick_debug flag
 if not quick_debug:

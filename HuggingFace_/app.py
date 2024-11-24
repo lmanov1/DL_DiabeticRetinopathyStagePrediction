@@ -390,7 +390,7 @@ def preprocess_image(img):
 # Global Scope:
 
 
-model = eval_start()
+# model = eval_start() # return it after that
 
 
 def classify_image(img, img_file):

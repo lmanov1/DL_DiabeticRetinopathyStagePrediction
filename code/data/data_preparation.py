@@ -18,7 +18,7 @@ def custom_callback(image: Image):
 # This class is used to prepare image data for training and validation using the fastai library.
 class DataPreparation:
     def __init__(self, csv_path, img_folder,
-                 valid_pct=0.2, batch_size=32, seed=42, sampler=None):
+                 valid_pct=0.2, batch_size=8, seed=42, sampler=None):
         self.csv_path = csv_path
         self.img_folder = img_folder + get_path_separator()
         self.valid_pct = valid_pct
