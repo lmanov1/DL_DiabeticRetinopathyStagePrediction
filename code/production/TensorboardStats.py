@@ -133,15 +133,7 @@ def plot_sample_predictions(dls, preds, targets, img_path='' ,
     #for i, (item, pred, target) in enumerate(zip(items.itertuples(), preds[:10], targets[:10])):
     for i, (item, pred, target) in enumerate(zip(items, preds[:num_items], targets[:num_items])):
         try:
-            print(f"Item: {item}, Prediction: {pred}, Target: {target}")
-            # # Construct full image path
-            # img_filename = item.id_code            
-            # if img_path:
-            #     full_path = os.path.join(img_path, img_filename)
-            # else:
-            #     full_path = itemz
-                
-            # Load and display image
+            print(f"Item: {item}, Prediction: {pred}, Target: {target}")            
             img = Image.open(item)
             axes[i].imshow(img)
             axes[i].set_title(f'True: {class_names[target]}\nPred: {class_names[pred]}')
