@@ -7,8 +7,7 @@ from all_defs import DATASET_REPO_ID , MODEL_DATASET_DIR  , REPO_ID , \
     models_upload_to_dataset , DRIVE_MODELS_URL
 from environs import Env
 
-
-#clone_train_directory(15)
+#clone_train_directory(22)
 
 env = Env()
 env.read_env()  # This loads the .env file
@@ -21,13 +20,12 @@ login(token=api_token)
 files_to_upload = [
     { "../../pyproject.toml": "./pyproject.toml"},
     {"../../requirements.txt": "./requirements.txt"},    
-    {"../models/train_model.py": "models/train_model.py"},
+    #{"../models/train_model.py": "models/train_model.py"},
     {"./haggingface_model.py": "./haggingface_model.py"},
     {"./TensorboardStats.py": "./TensorboardStats.py"},
     {"./app.py": "./app.py"},
     {"./__init__.py": "./__init__.py"},
-    {"./all_defs.py": "./all_defs.py"},
-    #{"./data/train19": "./data/train19"}
+    {"./all_defs.py": "./all_defs.py"}   
 ]
 
 # Upload the files to the repo

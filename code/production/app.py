@@ -105,10 +105,11 @@ inf_learner = Learner(
 
 early_stopping = EarlyStopping(patience=5)
 
-#device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 if model_type == 'pth':
     model = torch.load(pretrained_model_weigths_file,map_location=torch.device("cpu"))
     inf_learner.model = model
+    model = model.to(device)
 
 elif model_type == 'pkl':
     inf_learner = load_learner(pretrained_model_weigths_file)
@@ -120,7 +121,7 @@ elif model_type == 'keras':
 else:
     raise ValueError(f"Unsupported model format: {model_type}")
 
-class_names = ['No DR', 'Mild DR', 'Moderate DR', 'Severe DR', 'Proliferative DR']
+class_names = ['No DR (0)', 'Mild DR (1)', 'Moderate DR (2)', 'Severe DR (3)', 'Proliferative DR (4)']
 inf_learner.create_opt()
 inf_learner.model.eval()
 
@@ -253,7 +254,7 @@ def validate():
 inf_learner.model.eval()
 inf_learner.remove_cb(fastai.callback.progress.ProgressCallback)
 
-demo = gr.Blocks()
+demo = gr.Blocks(theme=gr.themes.Ocean())
 
 with demo:
 
@@ -268,9 +269,9 @@ with demo:
                 fn=classify_img,
                 inputs=gr.Image(type="pil", label="Choose Image to classify"),
                 outputs=[markdown_output, label_output],
-                examples=examples,
+                examples=examples,                
                 title="Single Image Prediction",
-                cache_examples=False
+                cache_examples=True
             )
 
         with gr.Tab("Model Analysis"):

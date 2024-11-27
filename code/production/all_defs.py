@@ -77,8 +77,11 @@ def clone_train_directory(number_of_files: int = -1):
         number_of_files: Number of files to copy from each subdirectory. -1 means copy all
     """
     # Setup source and target paths
-    source_dir = Path('../../notebooks/data/train19')
-    target_dir = Path('./data/train19')
+    # source_dir = Path('../../notebooks/data/train19')
+    # target_dir = Path('./data/train19')
+    source_dir = Path('../../notebooks/data/aptos19_val')
+    target_dir = Path('./data/aptos19_val')
+    print(f"Cloning {number_of_files} files from {source_dir} to {target_dir}")
     
     if not source_dir.exists():
         raise ValueError(f"Source directory {source_dir} does not exist")
